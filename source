@@ -61,7 +61,7 @@ local ESPTable = {}
 local Startup = tick()
 local SelectedFurnace = nil
 local Debug = false
-local Version = "2.1.1"
+local Version = "2.2.0"
 
 -- < Allocate miscellaneous startup variables. />
 
@@ -387,7 +387,6 @@ end
 
 local Tabs = {
     Main = Window:AddTab('Main'),
-    Automation = Window:AddTab('AutoFarm'),
 	Dupe = Window:AddTab('Dupe'),
 	Hub = Window:AddTab('Other'),
     UISettings = Window:AddTab('UI Settings')
@@ -951,7 +950,6 @@ Options.SelectedFurnace1:OnChanged(function()
         end
     end
 end)
-
 local TPIDX = {}
 TPIDX['Utility Convenient Store'] = Vector3.new(-1002.573, 4.25, -611.692)
 TPIDX['Land Agency'] = Vector3.new(-1008, 4, -723)
@@ -961,11 +959,14 @@ TPIDX['Pickaxe Shop'] = Vector3.new(736.24, 2.25, 64.567)
 TPIDX["M's Dealership"] = Vector3.new(709.589, 8.25, -997.523)
 TPIDX['Mighty Furniture of ZD'] = Vector3.new(-1017.249, 4.25, 700.392)
 TPIDX['Electronics Antishop'] = Vector3.new(-106.961, 240, 1122.705) 
+TPIDX['Merchants Keep'] = Vector3.new(-3172, 21, 606) 
 TPIDX['Secret Stash'] = Vector3.new(-504.2, 4.25, -664.323)
 TPIDX['Meteor Rug'] = Vector3.new(-3475.94, 18, 1040.367)
+TPIDX['Radioactive Pick'] = Vector3.new(52, 0, 3153)
+TPIDX['Sacrifice Shrine'] = Vector3.new(639, 447, 1338)
 
 Teleports:AddDropdown('StoreTeleportDropDown', {
-    Values = { 'Utility Convenient Store', 'Land Agency', 'Ore Sellary', 'Utility Store', 'Pickaxe Shop' , "M's Dealership", 'Mighty Furniture of ZD', 'Electronics Antishop', 'Secret Stash', 'Meteor Rug'},
+    Values = { 'Utility Convenient Store', 'Land Agency', 'Ore Sellary', 'Utility Store', 'Pickaxe Shop' , "M's Dealership", 'Mighty Furniture of ZD', 'Electronics Antishop', 'Merchants Keep', 'Secret Stash', 'Meteor Rug', 'Radioactive Pick', 'Sacrifice Shrine'},
     Default = nil,
     Multi = false,
     Text = 'Building Teleports',
@@ -980,14 +981,18 @@ Options.StoreTeleportDropDown:OnChanged(function()
 end)
 
 local TPIDX2 = {}
-TPIDX2['Volcanium'] = Vector3.new(-2871.984, -776.293, 2789.415)
+TPIDX2['Uranium'] = Vector3.new(85, -80, 4586)
+TPIDX2['Volcanium/Obsidian'] = Vector3.new(-2928, 29, 1832)
 TPIDX2['Cloudnite'] = Vector3.new(472.196, 431.75, 1265.718)
+TPIDX2['Sunstone'] = Vector3.new(1004, 260, 89)
 TPIDX2['Emerald'] = Vector3.new(549.64, 273.75, 347.393)
 TPIDX2['Marble'] = Vector3.new(520.628, 11.75, -973.84)
-TPIDX2['Gold'] = Vector3.new(662.51, 16.5, -1502.161)
+TPIDX2['Gold/Silver'] = Vector3.new(662.51, 16.5, -1502.161)
+TPIDX2['Ruby/Sapphire/Opal/Amethyst'] = Vector3.new(-3170, 25, 1467)
+TPIDX2['Crystal'] = Vector3.new(1296, -188, 1050)
 
 Teleports:AddDropdown('OreTeleportDropDown', {
-    Values = {'Volcanium','Cloudnite','Emerald','Marble','Gold'},
+    Values = {'Uranium','Volcanium/Obsidian', 'Cloudnite', 'Sunstone', 'Emerald', 'Marble', 'Gold/Silver', 'Ruby/Sapphire/Opal/Amethyst', 'Crystal'},
     Default = nil,
     Multi = false,
     Text = 'Ore/Map teleports',
@@ -1123,44 +1128,6 @@ end)
 
 if isLGPremium and isLGPremium() then
 
-    local CFloop
-
-    MiscTab:AddToggle('InvisFlyBroWhyBro', {
-        Text = 'Invisible fly',
-        Default = false,
-        Tooltip = 'Makes you fly but appear in your original spot. Bypasses blacklists.',
-    })
-
-    CFspeed = 50
-
-    Toggles.InvisFlyBroWhyBro:OnChanged(function()
-        if Toggles.InvisFlyBroWhyBro.Value == true then
-            LocalPlayer.Character:FindFirstChildOfClass('Humanoid').PlatformStand = true
-            local Head = LocalPlayer.Character:WaitForChild("Head")
-            Head.Anchored = true
-            if CFloop then CFloop:Disconnect() end
-            CFloop = RunService.Heartbeat:Connect(function(deltaTime)
-                local moveDirection = LocalPlayer.Character:FindFirstChildOfClass('Humanoid').MoveDirection * (CFspeed * deltaTime)
-                local headCFrame = Head.CFrame
-                local cameraCFrame = workspace.CurrentCamera.CFrame
-                local cameraOffset = headCFrame:ToObjectSpace(cameraCFrame).Position
-                cameraCFrame = cameraCFrame * CFrame.new(-cameraOffset.X, -cameraOffset.Y, -cameraOffset.Z + 1)
-                local cameraPosition = cameraCFrame.Position
-                local headPosition = headCFrame.Position
-
-                local objectSpaceVelocity = CFrame.new(cameraPosition, Vector3.new(headPosition.X, cameraPosition.Y, headPosition.Z)):VectorToObjectSpace(moveDirection)
-                Head.CFrame = CFrame.new(headPosition) * (cameraCFrame - cameraPosition) * CFrame.new(objectSpaceVelocity)
-            end)
-        else
-            if CFloop then
-                CFloop:Disconnect()
-                LocalPlayer.Character:FindFirstChildOfClass('Humanoid').PlatformStand = false
-                local Head = LocalPlayer.Character:WaitForChild("Head")
-                Head.Anchored = false
-            end
-        end
-    end)
-
     MiscTab:AddToggle('StealOwner', {
         Text = 'Owner Spoof',
         Default = false,
@@ -1259,24 +1226,6 @@ MiscTab:AddToggle('GrabPlayers', {
     Tooltip = 'Allows you to grab players.',
 })
 
-MiscTab:AddToggle('NoDrown', {
-    Text = 'No drown',
-    Default = false,
-    Tooltip = 'Gives you infinite air capacity.',
-})
-
-MiscTab:AddToggle('InfiniteZoom', {
-    Text = 'Infinite Zoom',
-    Default = false,
-    Tooltip = 'Allows you to zoom out infinitely.',
-})
-
-MiscTab:AddToggle('FullbrightPlayer', {
-    Text = 'Fullbright',
-    Default = false,
-    Tooltip = 'Turns on the lights.',
-})
-
 MiscTab:AddButton('Telekinesis Gun', function()
        loadstring(game:HttpGet("https://pastebin.com/raw/fauftxLe"))()
 end)
@@ -1287,14 +1236,6 @@ end)
 --     Tooltip = 'Unlocks all blueprints for free.',
 -- })
 
-Toggles.InfiniteZoom:OnChanged(function()
-    if Toggles.InfiniteZoom.Value == true then
-        LocalPlayer.CameraMaxZoomDistance = math.huge
-    else
-        LocalPlayer.CameraMaxZoomDistance = 50
-    end
-end)
-
 -- Toggles.UnlockAllBlueprints:OnChanged(function()
 --     if Toggles.UnlockAllBlueprints.Value == true then
 --         for i,v in next, game.ReplicatedStorage.Objects:GetChildren() do
@@ -1304,28 +1245,6 @@ end)
 --         end
 --     end
 -- end)
-
-Toggles.FullbrightPlayer:OnChanged(function()
-    if Toggles.FullbrightPlayer.Value == true then
-        game.Lighting.GlobalShadows = false
-        LocalPlayer.PlayerGui.ClientScreenScript.Disabled = true
-        game:GetService("Workspace").Cycle.Current.RobloxLocked = true
-        game:GetService("Workspace").Cycle.RobloxLocked = true
-    else
-        LocalPlayer.PlayerGui.ClientScreenScript.Disabled = false
-        game:GetService("Workspace").Cycle.Current.RobloxLocked = false
-        game:GetService("Workspace").Cycle.RobloxLocked = false
-        game.Lighting.GlobalShadows = true
-    end
-end)
-
-Toggles.NoDrown:OnChanged(function()
-    if Toggles.NoDrown.Value == true then
-       LocalPlayer.PlayerGui.ClientScreenScript.Config.WaterPulseDamage.Capacity.Value = math.huge
-    else
-        LocalPlayer.PlayerGui.ClientScreenScript.Config.WaterPulseDamage.Capacity.Value = 100
-    end
-end)
 
 Toggles.GrabPlayers:OnChanged(function()
     if Toggles.GrabPlayers.Value == true then
@@ -1354,7 +1273,108 @@ Toggles.GrabPlayers:OnChanged(function()
 end)
 
 
+local PlayerUtilitiesTab = Tabs.Main:AddRightGroupbox('Player Utilities')
 
+if isLGPremium and isLGPremium() then
+
+    local CFloop
+
+    PlayerUtilitiesTab:AddToggle('InvisFlyBroWhyBro', {
+        Text = 'Invisible fly',
+        Default = false,
+        Tooltip = 'Makes you fly but appear in your original spot. Bypasses blacklists.',
+    })
+
+    CFspeed = 50
+
+    Toggles.InvisFlyBroWhyBro:OnChanged(function()
+        if Toggles.InvisFlyBroWhyBro.Value == true then
+            LocalPlayer.Character:FindFirstChildOfClass('Humanoid').PlatformStand = true
+            local Head = LocalPlayer.Character:WaitForChild("Head")
+            Head.Anchored = true
+            if CFloop then CFloop:Disconnect() end
+            CFloop = RunService.Heartbeat:Connect(function(deltaTime)
+                local moveDirection = LocalPlayer.Character:FindFirstChildOfClass('Humanoid').MoveDirection * (CFspeed * deltaTime)
+                local headCFrame = Head.CFrame
+                local cameraCFrame = workspace.CurrentCamera.CFrame
+                local cameraOffset = headCFrame:ToObjectSpace(cameraCFrame).Position
+                cameraCFrame = cameraCFrame * CFrame.new(-cameraOffset.X, -cameraOffset.Y, -cameraOffset.Z + 1)
+                local cameraPosition = cameraCFrame.Position
+                local headPosition = headCFrame.Position
+
+                local objectSpaceVelocity = CFrame.new(cameraPosition, Vector3.new(headPosition.X, cameraPosition.Y, headPosition.Z)):VectorToObjectSpace(moveDirection)
+                Head.CFrame = CFrame.new(headPosition) * (cameraCFrame - cameraPosition) * CFrame.new(objectSpaceVelocity)
+            end)
+        else
+            if CFloop then
+                CFloop:Disconnect()
+                LocalPlayer.Character:FindFirstChildOfClass('Humanoid').PlatformStand = false
+                local Head = LocalPlayer.Character:WaitForChild("Head")
+                Head.Anchored = false
+            end
+        end
+    end)
+end
+
+
+PlayerUtilitiesTab:AddToggle('NoDrown', {
+    Text = 'No Damage',
+    Default = false,
+    Tooltip = 'Gives you infinite air capacity.',
+})
+
+PlayerUtilitiesTab:AddToggle('InfiniteZoom', {
+    Text = 'Infinite Zoom',
+    Default = false,
+    Tooltip = 'Allows you to zoom out infinitely.',
+})
+
+PlayerUtilitiesTab:AddToggle('FullbrightPlayer', {
+    Text = 'Fullbright',
+    Default = false,
+    Tooltip = 'Turns on the lights.',
+})
+
+PlayerUtilitiesTab:AddButton('No Fog', function()
+    game:GetService("Lighting").FogEnd = 100000
+	for i,v in pairs(game:GetService("Lighting"):GetDescendants()) do
+		if v:IsA("Atmosphere") then
+			v:Destroy()
+		end
+	end
+end)
+
+Toggles.FullbrightPlayer:OnChanged(function()
+    if Toggles.FullbrightPlayer.Value == true then
+        game.Lighting.GlobalShadows = false
+        LocalPlayer.PlayerGui.ClientScreenScript.Disabled = true
+        game:GetService("Workspace").Cycle.Current.RobloxLocked = true
+        game:GetService("Workspace").Cycle.RobloxLocked = true
+    else
+        LocalPlayer.PlayerGui.ClientScreenScript.Disabled = false
+        game:GetService("Workspace").Cycle.Current.RobloxLocked = false
+        game:GetService("Workspace").Cycle.RobloxLocked = false
+        game.Lighting.GlobalShadows = true
+    end
+end)
+
+Toggles.NoDrown:OnChanged(function()
+    if Toggles.NoDrown.Value == true then
+       LocalPlayer.PlayerGui.ClientScreenScript.Config.WaterPulseDamage.Capacity.Value = math.huge
+	   LocalPlayer.PlayerGui.ClientScreenScript.Config.RadPulseDamage.Capacity.Value = math.huge
+    else
+        LocalPlayer.PlayerGui.ClientScreenScript.Config.WaterPulseDamage.Capacity.Value = 100
+		LocalPlayer.PlayerGui.ClientScreenScript.Config.RadPulseDamage.Capacity.Value = 100
+    end
+end)
+
+Toggles.InfiniteZoom:OnChanged(function()
+    if Toggles.InfiniteZoom.Value == true then
+        LocalPlayer.CameraMaxZoomDistance = math.huge
+    else
+        LocalPlayer.CameraMaxZoomDistance = 50
+    end
+end)
 
 -- < Tabs.Money UI Setup >
 
@@ -1413,7 +1433,7 @@ MoneyTab:AddToggle('IdleIncome', {
 
 -- < Tabs.Automation UI Setup >
 
-local AutofarmTab = Tabs.Automation:AddLeftGroupbox('Autofarms')
+local AutofarmTab = Tabs.Hub:AddRightGroupbox('Autofarms')
 
 -- AutofarmTab:AddToggle('BoxAutoFarm', {
 --     Text = 'Box Delivery Autofarm',
@@ -1506,30 +1526,6 @@ DupeMainUnderTab:AddButton('Reload Slot', function()
        game:GetService("ReplicatedStorage").Events.ReloadSlot:InvokeServer() 
 end)
 
-DupeMainUnderTab:AddButton('Open box with materials around', function()
-    for _,Box in pairs(workspace.Grabable:GetChildren()) do
-            if Box.Name == "MaterialBox" then
-                if (Box.Box.Position-game.Players.LocalPlayer.Character.HumanoidRootPart.Position).Magnitude<15 then
-                    if Box.Box:findFirstChild("Interact") then
-                        Box.Box.Interact:FireServer()
-                    end
-                end
-            end
-    end   
-end)
-
-DupeMainUnderTab:AddButton('Pick up items around', function()
-       for _,tool in pairs(workspace.Grabable:GetChildren()) do
-            		if tool.Name == "Tool" then
-                		if (tool.Part.Position-game.Players.LocalPlayer.Character.HumanoidRootPart.Position).Magnitude<30 then
-                   			if tool.Part:findFirstChild("Interact") then
-                        		tool.Part.Interact:FireServer()
-                    		end
-                		end
-            		end
-        end
-end)
-
 DupeMainUnderTab:AddButton('Dupe box material', function()
     local yesButton = game.Players.LocalPlayer.PlayerGui.UserGui.Dialog.Yes
 	for i,v in pairs(getconnections(yesButton.MouseButton1Click)) do
@@ -1546,27 +1542,7 @@ DupeMainUnderTab:AddButton('Dupe box material', function()
     end  
 end)
 
-local DupeMageUnderTab = Tabs.Dupe:AddRightGroupbox('Mage Gift')
-
-DupeMageUnderTab:AddButton('Delete cooldown Mage Gift', function()
-    game.Players.LocalPlayer:WaitForChild("Values"):WaitForChild("Saveable"):WaitForChild("MageGiftCooldown"):Destroy()
-end)
-
-DupeMageUnderTab:AddButton('Dupe MageGift', function()
-    local yesButton = game.Players.LocalPlayer.PlayerGui.UserGui.Dialog.Yes
-	for i,v in pairs(getconnections(yesButton.MouseButton1Click)) do
-	v:Fire()
-	end
-	for _,Gift in pairs(workspace.Grabable:GetChildren()) do
-            		if Gift.Name == "Gift of Mage" then
-               			if (Gift.Gift.Position-game.Players.LocalPlayer.Character.HumanoidRootPart.Position).Magnitude<30 then
-                    			if Gift.Gift:findFirstChild("Interact") then
-                        			Gift.Gift.Interact:FireServer()
-								end
-                		end
-					end
-    end 
-end)
+local DupeMageUnderTab = Tabs.Dupe:AddLeftGroupbox('Halloween')
 
 local DupeXMASUnderTab = Tabs.Dupe:AddRightGroupbox('Christmas')
 
@@ -1584,6 +1560,23 @@ DupeXMASUnderTab:AddButton('Dupe Shaman Gift', function()
                         end
                     end
             end
+end)
+
+DupeXMASUnderTab:AddButton('Dupe Mage Gift', function()
+    local yesButton = game.Players.LocalPlayer.PlayerGui.UserGui.Dialog.Yes
+	for i,v in pairs(getconnections(yesButton.MouseButton1Click)) do
+	v:Fire()
+	end
+	task.wait(0.4)
+	for _,Gift in pairs(workspace.Grabable:GetChildren()) do
+            		if Gift.Name == "Gift of Mage" then
+               			if (Gift.Gift.Position-game.Players.LocalPlayer.Character.HumanoidRootPart.Position).Magnitude<30 then
+                    			if Gift.Gift:findFirstChild("Interact") then
+                        			Gift.Gift.Interact:FireServer()
+								end
+                		end
+					end
+    end 
 end)
 
 local EspOtherTab = Tabs.Hub:AddLeftGroupbox('Esp')
@@ -1734,6 +1727,31 @@ EspOtherTab:AddButton('Esp Rare ores', function()
 end)
 
 local ServerOtherUnderTab = Tabs.Hub:AddRightGroupbox('Other Utilities')
+
+ServerOtherUnderTab:AddButton('Open box with materials around', function()
+    for _,Box in pairs(workspace.Grabable:GetChildren()) do
+            if Box.Name == "MaterialBox" then
+                if (Box.Box.Position-game.Players.LocalPlayer.Character.HumanoidRootPart.Position).Magnitude<15 then
+                    if Box.Box:findFirstChild("Interact") then
+                        Box.Box.Interact:FireServer()
+                    end
+                end
+            end
+    end   
+end)
+
+ServerOtherUnderTab:AddButton('Pick up items around', function()
+       for _,tool in pairs(workspace.Grabable:GetChildren()) do
+            		if tool.Name == "Tool" then
+                		if (tool.Part.Position-game.Players.LocalPlayer.Character.HumanoidRootPart.Position).Magnitude<30 then
+                   			if tool.Part:findFirstChild("Interact") then
+                        		tool.Part.Interact:FireServer()
+                    		end
+                		end
+            		end
+        end
+end)
+
 
 ServerOtherUnderTab:AddButton('Server Rejoin', function()
    game:GetService("TeleportService"):TeleportToPlaceInstance(game.PlaceId, game.JobId, game:GetService("Players").LocalPlayer)
