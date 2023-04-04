@@ -61,7 +61,7 @@ local ESPTable = {}
 local Startup = tick()
 local SelectedFurnace = nil
 local Debug = false
-local Version = "2.2.0"
+local Version = "2.2.1"
 
 -- < Allocate miscellaneous startup variables. />
 
@@ -790,6 +790,25 @@ end
 
 OreTeleports:AddButton('Save current location', function()
     CustomTPPos = LocalPlayer.Character.HumanoidRootPart.CFrame
+    Waypoint = LocalPlayer.Character.HumanoidRootPart.Position
+end)
+
+OreTeleports:AddButton('Check saved position', function()
+   LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(Waypoint)
+end)
+
+OreTeleports:AddButton('Teleport nearby entities to saved position', function()
+    Welds = {}
+    task.spawn(function()
+        for i,v in pairs(workspace:GetDescendants()) do
+            if v.Name == "Welds" and v:IsA("Folder") then
+                for i,x in pairs(v:GetChildren()) do
+                    table.insert(Welds,x)
+                end
+            end
+        end
+    end)
+    EntityTeleport(CustomTPPos.Position)
 end)
 
 OreTeleports:AddButton('Teleport nearby ores to saved position', function()
