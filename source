@@ -61,7 +61,7 @@ local ESPTable = {}
 local Startup = tick()
 local SelectedFurnace = nil
 local Debug = false
-local Version = "2.2.1"
+local Version = "2.2.2"
 
 -- < Allocate miscellaneous startup variables. />
 
