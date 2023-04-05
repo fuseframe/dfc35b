@@ -530,6 +530,7 @@ local AutoNeonCarCoro = coroutine.create(function()
     end
 end)
 
+
 local LoopMoneyCoro = coroutine.create(function()
     while wait(11) do
         if Toggles.LoopMoney.Value == true and Players[Options.MoneyUsername.Value] then
@@ -780,6 +781,25 @@ end
 
 OreTeleports:AddButton('Save current location', function()
     CustomTPPos = LocalPlayer.Character.HumanoidRootPart.CFrame
+    Waypoint = LocalPlayer.Character.HumanoidRootPart.Position
+end)
+
+OreTeleports:AddButton('Check saved position', function()
+   LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(Waypoint)
+end)
+
+OreTeleports:AddButton('Teleport nearby entities to saved position', function()
+    Welds = {}
+    task.spawn(function()
+        for i,v in pairs(workspace:GetDescendants()) do
+            if v.Name == "Welds" and v:IsA("Folder") then
+                for i,x in pairs(v:GetChildren()) do
+                    table.insert(Welds,x)
+                end
+            end
+        end
+    end)
+    EntityTeleport(CustomTPPos.Position)
 end)
 
 OreTeleports:AddButton('Teleport nearby ores to saved position', function()
