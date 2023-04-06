@@ -1631,7 +1631,7 @@ local EspXmasOtherTab = Tabs.EspUpTab:AddRightGroupbox('Esp Christmas')
 local EspPickOtherTab = Tabs.EspUpTab:AddLeftGroupbox('Esp Pickaxes')
 
 local function workingonupdatedfunc()
-CoreNotify("This function is not worked!",5)
+	Library:Notify("This function is not worked!",3)
 end
 
 EspItmesOtherTab:AddButton('Esp Grabiel', function()
