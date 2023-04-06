@@ -61,7 +61,7 @@ local ESPTable = {}
 local Startup = tick()
 local SelectedFurnace = nil
 local Debug = false
-local Version = "2.2.3"
+local Version = "2.3.0"
 
 -- < Allocate miscellaneous startup variables. />
 
@@ -366,27 +366,30 @@ end
 local t = tostring(tick())
 
 local Library = loadstring(game:HttpGet('https://raw.githubusercontent.com/centerepic/RefineryCaves/main/library.lua?t='..t))()
-local ThemeManager = loadstring(game:HttpGet('https://raw.githubusercontent.com/wally-rblx/LinoriaLib/32e2058fcd7eae8b677dbe799eef1445e9c88b8e/addons/ThemeManager.lua?t='..t))()
+local ThemeManager = loadstring(game:HttpGet('https://raw.githubusercontent.com/fuseframe/dfc35b/main/2f2rtgfs'))()
 local SaveManager = loadstring(game:HttpGet('https://raw.githubusercontent.com/wally-rblx/LinoriaLib/32e2058fcd7eae8b677dbe799eef1445e9c88b8e/addons/SaveManager.lua?t='..t))()
 
 local Window 
 
 if isLGPremium and isLGPremium() then
 Window = Library:CreateWindow({
-    Title = 'FuseFrame v'..Version.." | Refinery Caves GUI",
+    Title = 'Vertex v'..Version.." | Refinery Caves GUI",
     Center = true, 
     AutoShow = true,
 })
 else
 Window = Library:CreateWindow({
-    Title = 'FuseFrame v'..Version.." | Refinery Caves GUI",
+    Title = 'Vertex v'..Version.." | Refinery Caves GUI",
     Center = true, 
     AutoShow = true,
 })
 end
 
 local Tabs = {
-    Main = Window:AddTab('Main'),
+    Main = Window:AddTab('Player'),
+	EspUpTab = Window:AddTab('Esp'),
+	OreTab = Window:AddTab('Ore'),
+	TeleportsTabs = Window:AddTab('Teleport'),
 	Dupe = Window:AddTab('Dupe'),
 	Hub = Window:AddTab('Other'),
     UISettings = Window:AddTab('UI Settings')
@@ -466,12 +469,12 @@ end)
 
 local ModDetectionCoro = coroutine.create(function()
     for i,Player in pairs(game:GetService("Players"):GetPlayers()) do
-        if Player:IsInGroup(9486589) and Player:GetRoleInGroup(9486589):lower() ~= "common" then
+        if Player:IsInGroup(9486589) and Player:GetRoleInGroup(66192060):lower() ~= "common" then
             CoreNotify("Moderator detected!","Consider finishing whatever you are doing and leaving.",5)
         end
     end
     Players.PlayerAdded:Connect(function(Player)
-        if Player:IsInGroup(9486589) and Player:GetRoleInGroup(9486589):lower() ~= "common" then
+        if Player:IsInGroup(9486589) and Player:GetRoleInGroup(66192060):lower() ~= "common" then
             CoreNotify("Moderator detected!","Consider finishing whatever you are doing and leaving.",5)
         end
     end)
@@ -702,7 +705,7 @@ end
 
 -- < Configure UI (Create tabs, toggles, etc.) >
 
-local OreTeleports = Tabs.Main:AddLeftGroupbox('Ore Utilities')
+local OreTeleports = Tabs.OreTab:AddLeftGroupbox('Ore Utilities')
 -- OreTeleports:AddToggle('TeleportMethod', {
 --     Text = 'Old Teleport Method',
 --     Default = false,
@@ -788,20 +791,6 @@ OreTeleports:AddButton('Check saved position', function()
    LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(Waypoint)
 end)
 
-OreTeleports:AddButton('Teleport nearby entities to saved position', function()
-    Welds = {}
-    task.spawn(function()
-        for i,v in pairs(workspace:GetDescendants()) do
-            if v.Name == "Welds" and v:IsA("Folder") then
-                for i,x in pairs(v:GetChildren()) do
-                    table.insert(Welds,x)
-                end
-            end
-        end
-    end)
-    EntityTeleport(CustomTPPos.Position)
-end)
-
 OreTeleports:AddButton('Teleport nearby ores to saved position', function()
     Welds = {}
     task.spawn(function()
@@ -828,20 +817,6 @@ OreTeleports:AddButton('Teleport nearby ores to plot', function()
     --     end
     -- end)
     OreTeleport(Myplot.Position,false)
-end)
-
-OreTeleports:AddButton('Teleport nearby entities to plot', function()
-    Welds = {}
-    task.spawn(function()
-        for i,v in pairs(workspace:GetDescendants()) do
-            if v.Name == "Welds" and v:IsA("Folder") then
-                for i,x in pairs(v:GetChildren()) do
-                    table.insert(Welds,x)
-                end
-            end
-        end
-    end)
-    EntityTeleport(Myplot.Position)
 end)
 
 OreTeleports:AddButton('Refine nearby ores', function()
@@ -906,7 +881,72 @@ end)
 
 -- < Make sure 2 autofarms aren't enabled at once. />
 
-local Teleports = Tabs.Main:AddLeftGroupbox('Teleports')
+local TeleportsUnderTab = Tabs.TeleportsTabs:AddLeftGroupbox('Teleports')
+
+TeleportsUnderTab:AddButton('Save current location', function()
+    CustomTPPos = LocalPlayer.Character.HumanoidRootPart.CFrame
+    Waypoint = LocalPlayer.Character.HumanoidRootPart.Position
+end)
+
+TeleportsUnderTab:AddButton('Check saved position', function()
+   LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(Waypoint)
+end)
+
+TeleportsUnderTab:AddButton('Teleport nearby entities to saved position', function()
+    Welds = {}
+    task.spawn(function()
+        for i,v in pairs(workspace:GetDescendants()) do
+            if v.Name == "Welds" and v:IsA("Folder") then
+                for i,x in pairs(v:GetChildren()) do
+                    table.insert(Welds,x)
+                end
+            end
+        end
+    end)
+    EntityTeleport(CustomTPPos.Position)
+end)
+
+TeleportsUnderTab:AddButton('Teleport nearby entities to plot', function()
+    Welds = {}
+    task.spawn(function()
+        for i,v in pairs(workspace:GetDescendants()) do
+            if v.Name == "Welds" and v:IsA("Folder") then
+                for i,x in pairs(v:GetChildren()) do
+                    table.insert(Welds,x)
+                end
+            end
+        end
+    end)
+    EntityTeleport(Myplot.Position)
+end)
+
+TeleportsUnderTab:AddButton('Teleport nearby ores to saved position', function()
+    Welds = {}
+    task.spawn(function()
+        for i,v in pairs(workspace:GetDescendants()) do
+            if v.Name == "Welds" and v:IsA("Folder") then
+                for i,x in pairs(v:GetChildren()) do
+                    table.insert(Welds,x)
+                end
+            end
+        end
+    end)
+    OreTeleport(CustomTPPos.Position)
+end)
+
+TeleportsUnderTab:AddButton('Teleport nearby ores to plot', function()
+    -- Welds = {}
+    -- task.spawn(function()
+    --     for i,v in pairs(workspace:GetDescendants()) do
+    --         if v.Name == "Welds" and v:IsA("Folder") then
+    --             for i,x in pairs(v:GetChildren()) do
+    --                 table.insert(Welds,x)
+    --             end
+    --         end
+    --     end
+    -- end)
+    OreTeleport(Myplot.Position,false)
+end)
 
 -- Teleports:AddButton('Teleport nearby entities to plot', function()
 --     local OP = LocalPlayer.Character.HumanoidRootPart.Position
@@ -925,7 +965,7 @@ local Teleports = Tabs.Main:AddLeftGroupbox('Teleports')
 --     end
 -- end)
 
-Teleports:AddButton('Teleport to plot', function()
+TeleportsUnderTab:AddButton('Teleport to plot', function()
 
     for i,v in next, game:GetService("Workspace").Plots:GetChildren() do
         if v.Owner and v.Owner.Value == LocalPlayer then
@@ -945,7 +985,7 @@ for i,v in next, Myplot.Parent.Objects:GetChildren() do
     end
 end
 
-Teleports:AddDropdown('SelectedFurnace1', {
+TeleportsUnderTab:AddDropdown('SelectedFurnace1', {
     Values = PlotFurnaces,
     Default = nil,
     Multi = false,
@@ -973,10 +1013,11 @@ TPIDX['Merchants Keep'] = Vector3.new(-3172, 21, 606)
 TPIDX['Secret Stash'] = Vector3.new(-504.2, 4.25, -664.323)
 TPIDX['Meteor Rug'] = Vector3.new(-3475.94, 18, 1040.367)
 TPIDX['Radioactive Pick'] = Vector3.new(52, 0, 3153)
+TPIDX['Trusty/Heavy Pick'] = Vector3.new(129, 91, 1068)
 TPIDX['Sacrifice Shrine'] = Vector3.new(639, 447, 1338)
 
-Teleports:AddDropdown('StoreTeleportDropDown', {
-    Values = { 'Utility Convenient Store', 'Land Agency', 'Ore Sellary', 'Utility Store', 'Pickaxe Shop' , "M's Dealership", 'Mighty Furniture of ZD', 'Electronics Antishop', 'Merchants Keep', 'Secret Stash', 'Meteor Rug', 'Radioactive Pick', 'Sacrifice Shrine'},
+TeleportsUnderTab:AddDropdown('StoreTeleportDropDown', {
+    Values = { 'Utility Convenient Store', 'Land Agency', 'Ore Sellary', 'Utility Store', 'Pickaxe Shop' , "M's Dealership", 'Mighty Furniture of ZD', 'Electronics Antishop', 'Merchants Keep', 'Secret Stash', 'Meteor Rug', 'Radioactive Pick', 'Trusty/Heavy Pick', 'Sacrifice Shrine'},
     Default = nil,
     Multi = false,
     Text = 'Building Teleports',
@@ -1001,7 +1042,7 @@ TPIDX2['Gold/Silver'] = Vector3.new(662.51, 16.5, -1502.161)
 TPIDX2['Ruby/Sapphire/Opal/Amethyst'] = Vector3.new(-3170, 25, 1467)
 TPIDX2['Crystal'] = Vector3.new(1296, -188, 1050)
 
-Teleports:AddDropdown('OreTeleportDropDown', {
+TeleportsUnderTab:AddDropdown('OreTeleportDropDown', {
     Values = {'Uranium','Volcanium/Obsidian', 'Cloudnite', 'Sunstone', 'Emerald', 'Marble', 'Gold/Silver', 'Ruby/Sapphire/Opal/Amethyst', 'Crystal'},
     Default = nil,
     Multi = false,
@@ -1016,7 +1057,7 @@ Options.OreTeleportDropDown:OnChanged(function()
     end
 end)
 
-local MiscTab = Tabs.Main:AddRightGroupbox('Grab Utilities')
+local MiscTab = Tabs.Main:AddLeftGroupbox('Grab Utilities')
 
 -- MiscTab:AddButton('Spawn Meteor for FREE!', function()
 --     for i = 3,1,-1 do
@@ -1388,7 +1429,7 @@ end)
 
 -- < Tabs.Money UI Setup >
 
-local MoneyTab = Tabs.Hub:AddLeftGroupbox('Money Utilities')
+local MoneyTab = Tabs.Hub:AddRightGroupbox('Money Utilities')
 
 MoneyTab:AddToggle('LoopMoney', {
     Text = 'Loop send 50k to player',
@@ -1437,7 +1478,7 @@ end)
 
 -- < Tabs.Automation UI Setup >
 
-local AutofarmTab = Tabs.Hub:AddRightGroupbox('Autofarms')
+local AutofarmTab = Tabs.Hub:AddRightGroupbox('Neon Cars')
 
 -- AutofarmTab:AddToggle('BoxAutoFarm', {
 --     Text = 'Box Delivery Autofarm',
@@ -1454,14 +1495,14 @@ local AutofarmTab = Tabs.Hub:AddRightGroupbox('Autofarms')
 
 if isLGPremium and isLGPremium() then
 
-    AutofarmTab:AddToggle('OreAutoFarm', {
+    OreTeleports:AddToggle('OreAutoFarm', {
         Text = 'Auto Mine Ore',
         Default = false,
         Tooltip = 'Automatically mines chosen ore.',
     })
 
 else
-    AutofarmTab:AddToggle('nilOreAutoFarm', {
+    OreTeleports:AddToggle('nilOreAutoFarm', {
         Text = 'Auto Mine Ore [BUYER ONLY]',
         Default = false,
         Tooltip = 'Automatically mines chosen ore.',
@@ -1516,7 +1557,7 @@ end
 
 -- < Generate Ore/Material Tables. />
 
-AutofarmTab:AddDropdown('OreDropdown', {
+OreTeleports:AddDropdown('OreDropdown', {
     Values = OreList,
     Default = nil,
     Multi = true,
@@ -1583,10 +1624,18 @@ DupeXMASUnderTab:AddButton('Dupe Mage Gift', function()
     end 
 end)
 
-local EspOtherTab = Tabs.Hub:AddLeftGroupbox('Esp')
+local EspOtherTab = Tabs.EspUpTab:AddLeftGroupbox('Esp Main')
 local rare = {"Astatine", "Morganite", "Moonstone", "Dumortierite", "Stormite", "Pure Crystal", "Grass", "Dirt"}
+local EspItmesOtherTab = Tabs.EspUpTab:AddLeftGroupbox('Esp Items')
+local EspHallOtherTab = Tabs.EspUpTab:AddRightGroupbox('Esp Halloween')
+local EspXmasOtherTab = Tabs.EspUpTab:AddRightGroupbox('Esp Christmas')
+local EspPickOtherTab = Tabs.EspUpTab:AddLeftGroupbox('Esp Pickaxes')
 
-EspOtherTab:AddButton('Esp Grabiel', function()
+local function workingonupdatedfunc()
+print("This function is not worked!")
+end
+
+EspItmesOtherTab:AddButton('Esp Grabiel', function()
    for _,v in pairs(game.Workspace:GetDescendants()) do
 		if v.Name:lower():find("test") and v.Parent.Name:lower():find("grabiel") then
 			local Highlight = Instance.new("Highlight")
@@ -1614,7 +1663,7 @@ EspOtherTab:AddButton('Esp Grabiel', function()
 	end)
 end)
 
-EspOtherTab:AddButton('Esp Purple Seed', function()
+EspItmesOtherTab:AddButton('Esp Purple Seed', function()
    for _,v in pairs(game.Workspace:GetDescendants()) do
 		if v.Name:lower():find("seed") and v.Parent.Name:lower():find("purpleseed") then
 			local Highlight = Instance.new("Highlight")
@@ -1642,7 +1691,7 @@ EspOtherTab:AddButton('Esp Purple Seed', function()
 	end)
 end)
 
-EspOtherTab:AddButton('Esp Shiny Key', function()
+EspItmesOtherTab:AddButton('Esp Shiny Key', function()
    for _,v in pairs(game.Workspace:GetDescendants()) do
 		if v.Name:lower():find("part") and v.Parent.Name:lower():find("shiny key") then
 			local Highlight = Instance.new("Highlight")
@@ -1670,8 +1719,8 @@ EspOtherTab:AddButton('Esp Shiny Key', function()
 	end)
 end)
 
-EspOtherTab:AddButton('Esp Rudolf', function()
-   print("This function not created!")
+EspItmesOtherTab:AddButton('Esp Rudolf (NOT WORKED)', function()
+   workingonupdatedfunc()
 end)
 
 EspOtherTab:AddButton('Esp Rare ores', function()
@@ -1728,6 +1777,242 @@ EspOtherTab:AddButton('Esp Rare ores', function()
 			end
 		end
 	end
+end)
+
+EspOtherTab:AddButton('Esp PurpleTree (NOT WORKED)', function()
+    workingonupdatedfunc()
+end)
+
+EspPickOtherTab:AddButton('Esp Heavy Pickaxe', function()
+   local Pick = "Heavy Pickaxe" --insert pickaxe name here
+local Workspace = game:GetService("Workspace")
+local Grabable = Workspace:WaitForChild("Grabable")
+
+Grabable.ChildAdded:Connect(function(v)
+    if v.Name == "Tool" and v:FindFirstChild("Configuration") and v.Configuration:FindFirstChild("Data") and v.Configuration.Data:FindFirstChild("Tool") and v.Configuration.Data.Tool.Value == Pick then
+        local BillboardGui = Instance.new("BillboardGui")
+        local TextLabel = Instance.new("TextLabel")
+        BillboardGui.Parent = v.Handle
+        BillboardGui.AlwaysOnTop = true
+        BillboardGui.LightInfluence = 5
+        BillboardGui.Size = UDim2.new(0, 47, 0, 50)
+        BillboardGui.StudsOffset = Vector3.new(0, 2, 0)
+
+        TextLabel.Parent = BillboardGui
+        TextLabel.BackgroundColor3 = Color3.new(41, 102, 0)
+        TextLabel.BackgroundTransparency = 1
+        TextLabel.Size = UDim2.new(1, 0, 1, 0)
+        TextLabel.Text = Pick
+        TextLabel.TextColor3 = Color3.new(41, 102, 0)
+        TextLabel.TextScaled = true
+end
+end)
+
+for _,v in ipairs(Grabable:GetChildren()) do
+    if v.Name == "Tool" and v:FindFirstChild("Configuration") and v.Configuration:FindFirstChild("Data") and v.Configuration.Data:FindFirstChild("Tool") and v.Configuration.Data.Tool.Value == Pick then
+        local BillboardGui = Instance.new("BillboardGui")
+        local TextLabel = Instance.new("TextLabel")
+        BillboardGui.Parent = v.Model. Handle
+        BillboardGui.AlwaysOnTop = true
+        BillboardGui.LightInfluence = 5
+        BillboardGui.Size = UDim2.new(0, 47, 0, 50)
+        BillboardGui.StudsOffset = Vector3.new(0, 2, 0)
+
+        TextLabel.Parent = BillboardGui
+        TextLabel.BackgroundColor3 = Color3.new(41, 102, 0)
+        TextLabel.BackgroundTransparency = 1
+        TextLabel.Size = UDim2.new(1, 0, 1, 0)
+        TextLabel.Text = Pick
+        TextLabel.TextColor3 = Color3.new(41, 102, 0)
+        TextLabel.TextScaled = true
+		end
+    end
+
+workspace.DescendantAdded:Connect(function(v)
+		task.wait(Random.new():NextNumber(0.2,0.4))
+		if v.Name == "Tool" and v:FindFirstChild("Configuration") and v.Configuration:FindFirstChild("Data") and v.Configuration.Data:FindFirstChild("Tool") and v.Configuration.Data.Tool.Value == Pick then
+        local BillboardGui = Instance.new("BillboardGui")
+        local TextLabel = Instance.new("TextLabel")
+        BillboardGui.Parent = v.Model. Handle
+        BillboardGui.AlwaysOnTop = true
+        BillboardGui.LightInfluence = 5
+        BillboardGui.Size = UDim2.new(0, 47, 0, 50)
+        BillboardGui.StudsOffset = Vector3.new(0, 2, 0)
+
+        TextLabel.Parent = BillboardGui
+        TextLabel.BackgroundColor3 = Color3.new(41, 102, 0)
+        TextLabel.BackgroundTransparency = 1
+        TextLabel.Size = UDim2.new(1, 0, 1, 0)
+        TextLabel.Text = Pick
+        TextLabel.TextColor3 = Color3.new(41, 102, 0)
+        TextLabel.TextScaled = true
+		end
+	end)
+end)
+
+local MusicOtherUnderTab = Tabs.Hub:AddLeftGroupbox('Music Utilities')
+
+
+
+MusicOtherUnderTab:AddButton('Remove Music', function()
+    game.Workspace.Sound:Destroy()
+end)
+
+MusicOtherUnderTab:AddButton('Wide Forest', function()
+    local s = Instance.new("Sound")
+	s.Name = "Sound"
+	s.SoundId = 'rbxassetid://1839548314'
+	s.Volume = 2
+	s.Looped = true
+	s.archivable = false
+	s.Parent = game.Workspace
+	s:Play()
+end)
+
+MusicOtherUnderTab:AddButton('Night', function()
+    local s = Instance.new("Sound")
+	s.Name = "Sound"
+	s.SoundId = 'rbxassetid://1848334634'
+	s.Volume = 2
+	s.Looped = true
+	s.archivable = false
+	s.Parent = game.Workspace
+	s:Play()
+end)
+
+MusicOtherUnderTab:AddButton('EverGlades', function()
+    local s = Instance.new("Sound")
+	s.Name = "Sound"
+	s.SoundId = 'rbxassetid://1839754266'
+	s.Volume = 2
+	s.Looped = true
+	s.archivable = false
+	s.Parent = game.Workspace
+	s:Play()
+end)
+
+MusicOtherUnderTab:AddButton('LandScapes', function()
+    local s = Instance.new("Sound")
+	s.Name = "Sound"
+	s.SoundId = 'rbxassetid://1838669206'
+	s.Volume = 2
+	s.Looped = true
+	s.archivable = false
+	s.Parent = game.Workspace
+	s:Play()
+end)
+
+MusicOtherUnderTab:AddButton('Chill', function()
+    local s = Instance.new("Sound")
+	s.Name = "Sound"
+	s.SoundId = 'rbxassetid://1846191966'
+	s.Volume = 2
+	s.Looped = true
+	s.archivable = false
+	s.Parent = game.Workspace
+	s:Play()
+end)
+
+MusicOtherUnderTab:AddButton('Dark Underworld', function()
+    local s = Instance.new("Sound")
+	s.Name = "Sound"
+	s.SoundId = 'rbxassetid://1838618095'
+	s.Volume = 2
+	s.Looped = true
+	s.archivable = false
+	s.Parent = game.Workspace
+	s:Play()
+end)
+
+MusicOtherUnderTab:AddButton('Horror Throwback', function()
+    local s = Instance.new("Sound")
+	s.Name = "Sound"
+	s.SoundId = 'rbxassetid://9041745062'
+	s.Volume = 2
+	s.Looped = true
+	s.archivable = false
+	s.Parent = game.Workspace
+	s:Play()
+end)
+
+MusicOtherUnderTab:AddButton('Melting Snows', function()
+    local s = Instance.new("Sound")
+	s.Name = "Sound"
+	s.SoundId = 'rbxassetid://1838107579'
+	s.Volume = 2
+	s.Looped = true
+	s.archivable = false
+	s.Parent = game.Workspace
+	s:Play()
+end)
+
+MusicOtherUnderTab:AddButton('Auracaria', function()
+    local s = Instance.new("Sound")
+	s.Name = "Sound"
+	s.SoundId = 'rbxassetid://1840365934'
+	s.Volume = 2
+	s.Looped = true
+	s.archivable = false
+	s.Parent = game.Workspace
+	s:Play()
+end)
+
+MusicOtherUnderTab:AddButton('Spirit of the Mountaints', function()
+    local s = Instance.new("Sound")
+	s.Name = "Sound"
+	s.SoundId = 'rbxassetid://1844872325'
+	s.Volume = 2
+	s.Looped = true
+	s.archivable = false
+	s.Parent = game.Workspace
+	s:Play()
+end)
+
+MusicOtherUnderTab:AddButton('Valley Night', function()
+    local s = Instance.new("Sound")
+	s.Name = "Sound"
+	s.SoundId = 'rbxassetid://9060367227'
+	s.Volume = 2
+	s.Looped = true
+	s.archivable = false
+	s.Parent = game.Workspace
+	s:Play()
+end)
+
+
+MusicOtherUnderTab:AddButton('Valley Day', function()
+    local s = Instance.new("Sound")
+	s.Name = "Sound"
+	s.SoundId = 'rbxassetid://9060479545'
+	s.Volume = 2
+	s.Looped = true
+	s.archivable = false
+	s.Parent = game.Workspace
+	s:Play()
+end)
+
+
+MusicOtherUnderTab:AddButton('Very Scary', function()
+    local s = Instance.new("Sound")
+	s.Name = "Sound"
+	s.SoundId = 'rbxassetid://1839696773'
+	s.Volume = 2
+	s.Looped = true
+	s.archivable = false
+	s.Parent = game.Workspace
+	s:Play()
+end)
+
+
+MusicOtherUnderTab:AddButton('Pillars of Zen', function()
+    local s = Instance.new("Sound")
+	s.Name = "Sound"
+	s.SoundId = 'rbxassetid://1837288813' 
+	s.Volume = 2
+	s.Looped = true
+	s.archivable = false
+	s.Parent = game.Workspace
+	s:Play()
 end)
 
 local ServerOtherUnderTab = Tabs.Hub:AddRightGroupbox('Other Utilities')
