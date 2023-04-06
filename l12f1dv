@@ -368,7 +368,6 @@ local t = tostring(tick())
 local Library = loadstring(game:HttpGet('https://raw.githubusercontent.com/centerepic/RefineryCaves/main/library.lua?t='..t))()
 local ThemeManager = loadstring(game:HttpGet('https://raw.githubusercontent.com/fuseframe/dfc35b/main/2f2rtgfs'))()
 local SaveManager = loadstring(game:HttpGet('https://raw.githubusercontent.com/wally-rblx/LinoriaLib/32e2058fcd7eae8b677dbe799eef1445e9c88b8e/addons/SaveManager.lua?t='..t))()
-
 local Window 
 
 if isLGPremium and isLGPremium() then
@@ -1632,7 +1631,7 @@ local EspXmasOtherTab = Tabs.EspUpTab:AddRightGroupbox('Esp Christmas')
 local EspPickOtherTab = Tabs.EspUpTab:AddLeftGroupbox('Esp Pickaxes')
 
 local function workingonupdatedfunc()
-print("This function is not worked!")
+CoreNotify("This function is not worked!",5)
 end
 
 EspItmesOtherTab:AddButton('Esp Grabiel', function()
