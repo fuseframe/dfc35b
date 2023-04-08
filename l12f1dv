@@ -61,7 +61,7 @@ local ESPTable = {}
 local Startup = tick()
 local SelectedFurnace = nil
 local Debug = false
-local Version = "2.3.0"
+local Version = "2.3.0 BETA"
 
 -- < Allocate miscellaneous startup variables. />
 
@@ -372,7 +372,7 @@ local Window
 
 if isLGPremium and isLGPremium() then
 Window = Library:CreateWindow({
-    Title = 'Vertex v'..Version.." | Refinery Caves GUI",
+    Title = 'Vertex v'..Version.." | Refinery Caves GUI [possible errors]",
     Center = true, 
     AutoShow = true,
 })
@@ -488,50 +488,6 @@ for i,v in next, Myplot.Parent.Objects:GetChildren() do
         end
     end
 end
-
-local AutoNeonCarCoro = coroutine.create(function()
-    while wait(1) do
-        if Toggles.AutoNeon.Value == true then
-            local IsShiny = false
-
-            for i,_ in pairs(Options.SelectedSpawners1.Value) do
-                if Toggles.AutoNeon.Value == true then
-
-                    if Debug then print("Spawning car(s) of type",i) end
-
-                    local ActualSpawners = {}
-
-                    for _,s in pairs(Myplot.Parent.Objects:GetChildren()) do
-                        if s.Name == i then
-                            table.insert(ActualSpawners,s)
-                        end
-                    end
-
-                    if Debug then print(#ActualSpawners,"valid spawners found.") end
-
-                    for _,rs in pairs(ActualSpawners) do
-                        if Toggles.AutoNeon.Value == true then
-                            for _,x in pairs(workspace.Vehicles:GetChildren()) do
-                                if x:FindFirstChild("Configuration") and x:FindFirstChild("Configuration"):FindFirstChild("Data") and x:FindFirstChild("Configuration"):FindFirstChild("Data"):FindFirstChild("id") and x.Configuration.Data.id.Value == rs.Configuration.Data.id.Value and x.Configuration.Data.Shiny.Value == true then
-                                    IsShiny = true
-                                end
-                            end
-            
-                            if IsShiny == false then
-                                rs.Hitbox.Interact:FireServer()
-                            end
-            
-                            IsShiny = false
-
-                            wait(1/#ActualSpawners)
-                        end
-                    end
-                end
-            end
-        end
-    end
-end)
-
 
 local LoopMoneyCoro = coroutine.create(function()
     while wait(11) do
@@ -975,6 +931,7 @@ TeleportsUnderTab:AddButton('Teleport to plot', function()
     TP2(Myplot.CFrame + Vector3.new(0,4,0))
 end)
 
+
 local PlotFurnaces = {}
 
 for i,v in next, Myplot.Parent.Objects:GetChildren() do
@@ -999,6 +956,7 @@ Options.SelectedFurnace1:OnChanged(function()
         end
     end
 end)
+
 local TPIDX = {}
 TPIDX['Utility Convenient Store'] = Vector3.new(-1002.573, 4.25, -611.692)
 TPIDX['Land Agency'] = Vector3.new(-1008, 4, -723)
@@ -1040,9 +998,10 @@ TPIDX2['Marble'] = Vector3.new(520.628, 11.75, -973.84)
 TPIDX2['Gold/Silver'] = Vector3.new(662.51, 16.5, -1502.161)
 TPIDX2['Ruby/Sapphire/Opal/Amethyst'] = Vector3.new(-3170, 25, 1467)
 TPIDX2['Crystal'] = Vector3.new(1296, -188, 1050)
+TPIDX2['Pure Crystal/Purple Cave'] = Vector3.new(1805, -7, -101)
 
 TeleportsUnderTab:AddDropdown('OreTeleportDropDown', {
-    Values = {'Uranium','Volcanium/Obsidian', 'Cloudnite', 'Sunstone', 'Emerald', 'Marble', 'Gold/Silver', 'Ruby/Sapphire/Opal/Amethyst', 'Crystal'},
+    Values = {'Uranium','Volcanium/Obsidian', 'Cloudnite', 'Sunstone', 'Emerald', 'Marble', 'Gold/Silver', 'Ruby/Sapphire/Opal/Amethyst', 'Crystal', 'Pure Crystal/Purple Cave'},
     Default = nil,
     Multi = false,
     Text = 'Ore/Map teleports',
@@ -1474,10 +1433,67 @@ end)
 
 -- < Tabs.Money UI Setup />
 
+local AutoNeonCarCoro = coroutine.create(function()
+    while wait(1) do
+        if Toggles.AutoNeon.Value == true then
+            local IsShiny = false
+
+            for i,_ in pairs(Options.SelectedSpawners1.Value) do
+                if Toggles.AutoNeon.Value == true then
+
+                    if Debug then print("Spawning car(s) of type",i) end
+
+                    local ActualSpawners = {}
+
+                    for _,s in pairs(Myplot.Parent.Objects:GetChildren()) do
+                        if s.Name == i then
+                            table.insert(ActualSpawners,s)
+                        end
+                    end
+
+                    if Debug then print(#ActualSpawners,"valid spawners found.") end
+
+                    for _,rs in pairs(ActualSpawners) do
+                        if Toggles.AutoNeon.Value == true then
+                            for _,x in pairs(workspace.Vehicles:GetChildren()) do
+                                if x:FindFirstChild("Configuration") and x:FindFirstChild("Configuration"):FindFirstChild("Data") and x:FindFirstChild("Configuration"):FindFirstChild("Data"):FindFirstChild("id") and x.Configuration.Data.id.Value == rs.Configuration.Data.id.Value and x.Configuration.Data.Shiny.Value == true then
+                                    IsShiny = true
+                                end
+                            end
+            
+                            if IsShiny == false then
+                                rs.Hitbox.Interact:FireServer()
+                            end
+            
+                            IsShiny = false
+
+                            wait(0.1/#ActualSpawners)
+                        end
+                    end
+                end
+            end
+        end
+    end
+end)
 
 -- < Tabs.Automation UI Setup >
 
 local AutofarmTab = Tabs.Hub:AddRightGroupbox('Neon Cars')
+
+AutofarmTab:AddToggle('AutoNeon', {
+    Text = 'Auto Neon Cars',
+    Default = false,
+    Tooltip = 'Automatically spawns cars until neon.',
+})
+
+AutofarmTab:AddDropdown('SelectedSpawners1', {
+    Values = VehicleSpawners,
+    Default = nil,
+    Multi = true,
+    Text = 'Selected Vehicle Spawners',
+    Tooltip = 'List of vehicle spawners on your plot.',
+})
+
 
 -- AutofarmTab:AddToggle('BoxAutoFarm', {
 --     Text = 'Box Delivery Autofarm',
@@ -1508,21 +1524,6 @@ else
     })
     
 end
-
-AutofarmTab:AddToggle('AutoNeon', {
-    Text = 'Auto Neon Cars',
-    Default = false,
-    Tooltip = 'Automatically spawns cars until neon.',
-})
-
-AutofarmTab:AddDropdown('SelectedSpawners1', {
-    Values = VehicleSpawners,
-    Default = nil,
-    Multi = true,
-    Text = 'Selected Vehicle Spawners',
-    Tooltip = 'List of vehicle spawners on your plot.',
-})
-
 
 if isLGPremium and isLGPremium() then
 
@@ -1631,8 +1632,171 @@ local EspXmasOtherTab = Tabs.EspUpTab:AddRightGroupbox('Esp Christmas')
 local EspPickOtherTab = Tabs.EspUpTab:AddLeftGroupbox('Esp Pickaxes')
 
 local function workingonupdatedfunc()
-	Library:Notify("This function is not worked!",3)
+	Library:Notify("this function is under development!",3)
 end
+
+EspItmesOtherTab:AddButton('Esp Boxed Soccer Ball (NOT WORKING)', function()
+   workingonupdatedfunc()
+end)
+
+EspItmesOtherTab:AddButton('Esp Fallen Star (NOT WORKING)', function()
+   workingonupdatedfunc()
+end)
+
+local function PartyHatESPFUNC()
+		local Pick = "Party Hat" --insert pickaxe name here
+		local Workspace = game:GetService("Workspace")
+		local Grabable = Workspace:WaitForChild("Grabable")
+
+		Grabable.ChildAdded:Connect(function(v)
+			if v.Name == "Tool" and v:FindFirstChild("Configuration") and v.Configuration:FindFirstChild("Data") and v.Configuration.Data:FindFirstChild("Tool") and v.Configuration.Data.Tool.Value == Pick then
+				local BillboardGui = Instance.new("BillboardGui")
+				local TextLabel = Instance.new("TextLabel")
+				BillboardGui.Parent = v.Handle
+				BillboardGui.AlwaysOnTop = true
+				BillboardGui.LightInfluence = 5
+				BillboardGui.Size = UDim2.new(0, 47, 0, 50)
+				BillboardGui.StudsOffset = Vector3.new(0, 2, 0)
+
+				TextLabel.Parent = BillboardGui
+				TextLabel.BackgroundColor3 = Color3.new(41, 102, 0)
+				TextLabel.BackgroundTransparency = 1
+				TextLabel.Size = UDim2.new(1, 0, 1, 0)
+				TextLabel.Text = Pick
+				TextLabel.TextColor3 = Color3.new(255, 0, 0)
+				TextLabel.TextScaled = true
+		end
+		end)
+
+		for _,v in ipairs(Grabable:GetChildren()) do
+			if v.Name == "Tool" and v:FindFirstChild("Configuration") and v.Configuration:FindFirstChild("Data") and v.Configuration.Data:FindFirstChild("Tool") and v.Configuration.Data.Tool.Value == Pick then
+				local BillboardGui = Instance.new("BillboardGui")
+				local TextLabel = Instance.new("TextLabel")
+				BillboardGui.Parent = v.Model. Handle
+				BillboardGui.AlwaysOnTop = true
+				BillboardGui.LightInfluence = 5
+				BillboardGui.Size = UDim2.new(0, 47, 0, 50)
+				BillboardGui.StudsOffset = Vector3.new(0, 2, 0)
+
+				TextLabel.Parent = BillboardGui
+				TextLabel.BackgroundColor3 = Color3.new(41, 102, 0)
+				TextLabel.BackgroundTransparency = 1
+				TextLabel.Size = UDim2.new(1, 0, 1, 0)
+				TextLabel.Text = Pick
+				TextLabel.TextColor3 = Color3.new(255, 0, 0)
+				TextLabel.TextScaled = true
+				end
+			end
+
+		workspace.DescendantAdded:Connect(function(v)
+				task.wait(Random.new():NextNumber(0.2,0.4))
+				if v.Name == "Tool" and v:FindFirstChild("Configuration") and v.Configuration:FindFirstChild("Data") and v.Configuration.Data:FindFirstChild("Tool") and v.Configuration.Data.Tool.Value == Pick then
+				local BillboardGui = Instance.new("BillboardGui")
+				local TextLabel = Instance.new("TextLabel")
+				BillboardGui.Parent = v.Model. Handle
+				BillboardGui.AlwaysOnTop = true
+				BillboardGui.LightInfluence = 5
+				BillboardGui.Size = UDim2.new(0, 47, 0, 50)
+				BillboardGui.StudsOffset = Vector3.new(0, 2, 0)
+
+				TextLabel.Parent = BillboardGui
+				TextLabel.BackgroundColor3 = Color3.new(41, 102, 0)
+				TextLabel.BackgroundTransparency = 1
+				TextLabel.Size = UDim2.new(1, 0, 1, 0)
+				TextLabel.Text = Pick
+				TextLabel.TextColor3 = Color3.new(255, 0, 0)
+				TextLabel.TextScaled = true
+				end
+			end)
+end
+
+EspItmesOtherTab:AddButton('Esp Party Hat', function()
+   PartyHatESPFUNC()
+end)
+
+EspItmesOtherTab:AddButton('Esp Larry Skull (NOT WORKING)', function()
+   workingonupdatedfunc()
+end)
+
+EspItmesOtherTab:AddButton('Esp Toilet Paper (NOT WORKING)', function()
+   workingonupdatedfunc()
+end)
+
+EspItmesOtherTab:AddButton('Esp Golden Toilet (NOT WORKING)', function()
+   workingonupdatedfunc()
+end)
+
+EspItmesOtherTab:AddButton('Esp Crane Spawner (NOT WORKING)', function()
+   workingonupdatedfunc()
+end)
+
+EspXmasOtherTab:AddButton('Esp Mage Gift (NOT WORKING)', function()
+   workingonupdatedfunc()
+end)
+
+EspXmasOtherTab:AddButton('Esp Warlock Gift (NOT WORKING)', function()
+   workingonupdatedfunc()
+end)
+
+EspXmasOtherTab:AddButton('Esp Cleric Gift (NOT WORKING)', function()
+   workingonupdatedfunc()
+end)
+
+EspXmasOtherTab:AddButton('Esp Rogue Gift (NOT WORKING)', function()
+   workingonupdatedfunc()
+end)
+
+EspXmasOtherTab:AddButton('Esp Shaman Gift (NOT WORKING)', function()
+   workingonupdatedfunc()
+end)
+
+EspXmasOtherTab:AddButton('Esp Bard Gift (NOT WORKING)', function()
+   workingonupdatedfunc()
+end)
+
+EspXmasOtherTab:AddButton('Esp STV Spawner (NOT WORKING)', function()
+   workingonupdatedfunc()
+end)
+
+EspXmasOtherTab:AddButton('Esp No Update Sign (NOT WORKING)', function()
+   workingonupdatedfunc()
+end)
+
+EspXmasOtherTab:AddButton('Esp SnowGlobe (NOT WORKING)', function()
+   workingonupdatedfunc()
+end)
+
+EspHallOtherTab:AddButton('Esp Boxed Jack Pickaxe (NOT WORKING)', function()
+   workingonupdatedfunc()
+end)
+
+EspHallOtherTab:AddButton('Esp Boxed Large Pumpkin (NOT WORKING)', function()
+   workingonupdatedfunc()
+end)
+
+EspHallOtherTab:AddButton('Esp Boxed Small Pumpkin (NOT WORKING)', function()
+   workingonupdatedfunc()
+end)
+
+EspHallOtherTab:AddButton('Esp Ghost Figure (NOT WORKING)', function()
+   workingonupdatedfunc()
+end)
+
+EspHallOtherTab:AddButton('Esp Hallow Lantern (NOT WORKING)', function()
+   workingonupdatedfunc()
+end)
+
+EspHallOtherTab:AddButton('Esp Haunted Essence (NOT WORKING)', function()
+   workingonupdatedfunc()
+end)
+
+EspHallOtherTab:AddButton('Esp Candle (NOT WORKING)', function()
+   workingonupdatedfunc()
+end)
+
+EspHallOtherTab:AddButton('Esp Mansion Picture (NOT WORKING)', function()
+   workingonupdatedfunc()
+end)
 
 EspItmesOtherTab:AddButton('Esp Grabiel', function()
    for _,v in pairs(game.Workspace:GetDescendants()) do
@@ -1718,7 +1882,7 @@ EspItmesOtherTab:AddButton('Esp Shiny Key', function()
 	end)
 end)
 
-EspItmesOtherTab:AddButton('Esp Rudolf (NOT WORKED)', function()
+EspItmesOtherTab:AddButton('Esp Rudolf (NOT WORKING)', function()
    workingonupdatedfunc()
 end)
 
@@ -1778,80 +1942,764 @@ EspOtherTab:AddButton('Esp Rare ores', function()
 	end
 end)
 
-EspOtherTab:AddButton('Esp PurpleTree (NOT WORKED)', function()
+EspOtherTab:AddButton('Esp PurpleTree (NOT WORKING)', function()
     workingonupdatedfunc()
 end)
 
-EspPickOtherTab:AddButton('Esp Heavy Pickaxe', function()
-   local Pick = "Heavy Pickaxe" --insert pickaxe name here
-local Workspace = game:GetService("Workspace")
-local Grabable = Workspace:WaitForChild("Grabable")
+local function HeavyPickESPFUNC() -- w
+		local Pick = "Heavy Pickaxe" --insert pickaxe name here
+		local Workspace = game:GetService("Workspace")
+		local Grabable = Workspace:WaitForChild("Grabable")
 
-Grabable.ChildAdded:Connect(function(v)
-    if v.Name == "Tool" and v:FindFirstChild("Configuration") and v.Configuration:FindFirstChild("Data") and v.Configuration.Data:FindFirstChild("Tool") and v.Configuration.Data.Tool.Value == Pick then
-        local BillboardGui = Instance.new("BillboardGui")
-        local TextLabel = Instance.new("TextLabel")
-        BillboardGui.Parent = v.Handle
-        BillboardGui.AlwaysOnTop = true
-        BillboardGui.LightInfluence = 5
-        BillboardGui.Size = UDim2.new(0, 47, 0, 50)
-        BillboardGui.StudsOffset = Vector3.new(0, 2, 0)
+		Grabable.ChildAdded:Connect(function(v)
+			if v.Name == "Tool" and v:FindFirstChild("Configuration") and v.Configuration:FindFirstChild("Data") and v.Configuration.Data:FindFirstChild("Tool") and v.Configuration.Data.Tool.Value == Pick then
+				local BillboardGui = Instance.new("BillboardGui")
+				local TextLabel = Instance.new("TextLabel")
+				BillboardGui.Parent = v.Handle
+				BillboardGui.AlwaysOnTop = true
+				BillboardGui.LightInfluence = 5
+				BillboardGui.Size = UDim2.new(0, 47, 0, 50)
+				BillboardGui.StudsOffset = Vector3.new(0, 2, 0)
 
-        TextLabel.Parent = BillboardGui
-        TextLabel.BackgroundColor3 = Color3.new(41, 102, 0)
-        TextLabel.BackgroundTransparency = 1
-        TextLabel.Size = UDim2.new(1, 0, 1, 0)
-        TextLabel.Text = Pick
-        TextLabel.TextColor3 = Color3.new(41, 102, 0)
-        TextLabel.TextScaled = true
+				TextLabel.Parent = BillboardGui
+				TextLabel.BackgroundColor3 = Color3.new(41, 102, 0)
+				TextLabel.BackgroundTransparency = 1
+				TextLabel.Size = UDim2.new(1, 0, 1, 0)
+				TextLabel.Text = Pick
+				TextLabel.TextColor3 = Color3.new(41, 102, 0)
+				TextLabel.TextScaled = true
+		end
+		end)
+
+		for _,v in ipairs(Grabable:GetChildren()) do
+			if v.Name == "Tool" and v:FindFirstChild("Configuration") and v.Configuration:FindFirstChild("Data") and v.Configuration.Data:FindFirstChild("Tool") and v.Configuration.Data.Tool.Value == Pick then
+				local BillboardGui = Instance.new("BillboardGui")
+				local TextLabel = Instance.new("TextLabel")
+				BillboardGui.Parent = v.Model. Handle
+				BillboardGui.AlwaysOnTop = true
+				BillboardGui.LightInfluence = 5
+				BillboardGui.Size = UDim2.new(0, 47, 0, 50)
+				BillboardGui.StudsOffset = Vector3.new(0, 2, 0)
+
+				TextLabel.Parent = BillboardGui
+				TextLabel.BackgroundColor3 = Color3.new(41, 102, 0)
+				TextLabel.BackgroundTransparency = 1
+				TextLabel.Size = UDim2.new(1, 0, 1, 0)
+				TextLabel.Text = Pick
+				TextLabel.TextColor3 = Color3.new(41, 102, 0)
+				TextLabel.TextScaled = true
+				end
+			end
+
+		workspace.DescendantAdded:Connect(function(v)
+				task.wait(Random.new():NextNumber(0.2,0.4))
+				if v.Name == "Tool" and v:FindFirstChild("Configuration") and v.Configuration:FindFirstChild("Data") and v.Configuration.Data:FindFirstChild("Tool") and v.Configuration.Data.Tool.Value == Pick then
+				local BillboardGui = Instance.new("BillboardGui")
+				local TextLabel = Instance.new("TextLabel")
+				BillboardGui.Parent = v.Model. Handle
+				BillboardGui.AlwaysOnTop = true
+				BillboardGui.LightInfluence = 5
+				BillboardGui.Size = UDim2.new(0, 47, 0, 50)
+				BillboardGui.StudsOffset = Vector3.new(0, 2, 0)
+
+				TextLabel.Parent = BillboardGui
+				TextLabel.BackgroundColor3 = Color3.new(41, 102, 0)
+				TextLabel.BackgroundTransparency = 1
+				TextLabel.Size = UDim2.new(1, 0, 1, 0)
+				TextLabel.Text = Pick
+				TextLabel.TextColor3 = Color3.new(41, 102, 0)
+				TextLabel.TextScaled = true
+				end
+			end)
 end
+
+local function SporePickESPFUNC()
+		local Pick = "Spore Pickaxe" --insert pickaxe name here
+		local Workspace = game:GetService("Workspace")
+		local Grabable = Workspace:WaitForChild("Grabable")
+
+		Grabable.ChildAdded:Connect(function(v)
+			if v.Name == "Tool" and v:FindFirstChild("Configuration") and v.Configuration:FindFirstChild("Data") and v.Configuration.Data:FindFirstChild("Tool") and v.Configuration.Data.Tool.Value == Pick then
+				local BillboardGui = Instance.new("BillboardGui")
+				local TextLabel = Instance.new("TextLabel")
+				BillboardGui.Parent = v.Handle
+				BillboardGui.AlwaysOnTop = true
+				BillboardGui.LightInfluence = 5
+				BillboardGui.Size = UDim2.new(0, 47, 0, 50)
+				BillboardGui.StudsOffset = Vector3.new(0, 2, 0)
+
+				TextLabel.Parent = BillboardGui
+				TextLabel.BackgroundColor3 = Color3.new(41, 102, 0)
+				TextLabel.BackgroundTransparency = 1
+				TextLabel.Size = UDim2.new(1, 0, 1, 0)
+				TextLabel.Text = Pick
+				TextLabel.TextColor3 = Color3.new(41, 102, 0)
+				TextLabel.TextScaled = true
+		end
+		end)
+
+		for _,v in ipairs(Grabable:GetChildren()) do
+			if v.Name == "Tool" and v:FindFirstChild("Configuration") and v.Configuration:FindFirstChild("Data") and v.Configuration.Data:FindFirstChild("Tool") and v.Configuration.Data.Tool.Value == Pick then
+				local BillboardGui = Instance.new("BillboardGui")
+				local TextLabel = Instance.new("TextLabel")
+				BillboardGui.Parent = v.Model. Handle
+				BillboardGui.AlwaysOnTop = true
+				BillboardGui.LightInfluence = 5
+				BillboardGui.Size = UDim2.new(0, 47, 0, 50)
+				BillboardGui.StudsOffset = Vector3.new(0, 2, 0)
+
+				TextLabel.Parent = BillboardGui
+				TextLabel.BackgroundColor3 = Color3.new(41, 102, 0)
+				TextLabel.BackgroundTransparency = 1
+				TextLabel.Size = UDim2.new(1, 0, 1, 0)
+				TextLabel.Text = Pick
+				TextLabel.TextColor3 = Color3.new(41, 102, 0)
+				TextLabel.TextScaled = true
+				end
+			end
+
+		workspace.DescendantAdded:Connect(function(v)
+				task.wait(Random.new():NextNumber(0.2,0.4))
+				if v.Name == "Tool" and v:FindFirstChild("Configuration") and v.Configuration:FindFirstChild("Data") and v.Configuration.Data:FindFirstChild("Tool") and v.Configuration.Data.Tool.Value == Pick then
+				local BillboardGui = Instance.new("BillboardGui")
+				local TextLabel = Instance.new("TextLabel")
+				BillboardGui.Parent = v.Model. Handle
+				BillboardGui.AlwaysOnTop = true
+				BillboardGui.LightInfluence = 5
+				BillboardGui.Size = UDim2.new(0, 47, 0, 50)
+				BillboardGui.StudsOffset = Vector3.new(0, 2, 0)
+
+				TextLabel.Parent = BillboardGui
+				TextLabel.BackgroundColor3 = Color3.new(41, 102, 0)
+				TextLabel.BackgroundTransparency = 1
+				TextLabel.Size = UDim2.new(1, 0, 1, 0)
+				TextLabel.Text = Pick
+				TextLabel.TextColor3 = Color3.new(41, 102, 0)
+				TextLabel.TextScaled = true
+				end
+			end)
+end
+
+local function FrostPickESPFUNC() -- w
+		local Pick = "Frostbite Spore Pickaxe" --insert pickaxe name here
+		local Workspace = game:GetService("Workspace")
+		local Grabable = Workspace:WaitForChild("Grabable")
+
+		Grabable.ChildAdded:Connect(function(v)
+			if v.Name == "Tool" and v:FindFirstChild("Configuration") and v.Configuration:FindFirstChild("Data") and v.Configuration.Data:FindFirstChild("Tool") and v.Configuration.Data.Tool.Value == Pick then
+				local BillboardGui = Instance.new("BillboardGui")
+				local TextLabel = Instance.new("TextLabel")
+				BillboardGui.Parent = v.Handle
+				BillboardGui.AlwaysOnTop = true
+				BillboardGui.LightInfluence = 5
+				BillboardGui.Size = UDim2.new(0, 47, 0, 50)
+				BillboardGui.StudsOffset = Vector3.new(0, 2, 0)
+
+				TextLabel.Parent = BillboardGui
+				TextLabel.BackgroundColor3 = Color3.new(41, 102, 0)
+				TextLabel.BackgroundTransparency = 1
+				TextLabel.Size = UDim2.new(1, 0, 1, 0)
+				TextLabel.Text = Pick
+				TextLabel.TextColor3 = Color3.new(41, 102, 0)
+				TextLabel.TextScaled = true
+		end
+		end)
+
+		for _,v in ipairs(Grabable:GetChildren()) do
+			if v.Name == "Tool" and v:FindFirstChild("Configuration") and v.Configuration:FindFirstChild("Data") and v.Configuration.Data:FindFirstChild("Tool") and v.Configuration.Data.Tool.Value == Pick then
+				local BillboardGui = Instance.new("BillboardGui")
+				local TextLabel = Instance.new("TextLabel")
+				BillboardGui.Parent = v.Model. Handle
+				BillboardGui.AlwaysOnTop = true
+				BillboardGui.LightInfluence = 5
+				BillboardGui.Size = UDim2.new(0, 47, 0, 50)
+				BillboardGui.StudsOffset = Vector3.new(0, 2, 0)
+
+				TextLabel.Parent = BillboardGui
+				TextLabel.BackgroundColor3 = Color3.new(41, 102, 0)
+				TextLabel.BackgroundTransparency = 1
+				TextLabel.Size = UDim2.new(1, 0, 1, 0)
+				TextLabel.Text = Pick
+				TextLabel.TextColor3 = Color3.new(41, 102, 0)
+				TextLabel.TextScaled = true
+				end
+			end
+
+		workspace.DescendantAdded:Connect(function(v)
+				task.wait(Random.new():NextNumber(0.2,0.4))
+				if v.Name == "Tool" and v:FindFirstChild("Configuration") and v.Configuration:FindFirstChild("Data") and v.Configuration.Data:FindFirstChild("Tool") and v.Configuration.Data.Tool.Value == Pick then
+				local BillboardGui = Instance.new("BillboardGui")
+				local TextLabel = Instance.new("TextLabel")
+				BillboardGui.Parent = v.Model. Handle
+				BillboardGui.AlwaysOnTop = true
+				BillboardGui.LightInfluence = 5
+				BillboardGui.Size = UDim2.new(0, 47, 0, 50)
+				BillboardGui.StudsOffset = Vector3.new(0, 2, 0)
+
+				TextLabel.Parent = BillboardGui
+				TextLabel.BackgroundColor3 = Color3.new(41, 102, 0)
+				TextLabel.BackgroundTransparency = 1
+				TextLabel.Size = UDim2.new(1, 0, 1, 0)
+				TextLabel.Text = Pick
+				TextLabel.TextColor3 = Color3.new(41, 102, 0)
+				TextLabel.TextScaled = true
+				end
+			end)
+end
+
+local function RadioactivePickESPFUNC() -- w
+		local Pick = "Radioactive Pickaxe" --insert pickaxe name here
+		local Workspace = game:GetService("Workspace")
+		local Grabable = Workspace:WaitForChild("Grabable")
+
+		Grabable.ChildAdded:Connect(function(v)
+			if v.Name == "Tool" and v:FindFirstChild("Configuration") and v.Configuration:FindFirstChild("Data") and v.Configuration.Data:FindFirstChild("Tool") and v.Configuration.Data.Tool.Value == Pick then
+				local BillboardGui = Instance.new("BillboardGui")
+				local TextLabel = Instance.new("TextLabel")
+				BillboardGui.Parent = v.Handle
+				BillboardGui.AlwaysOnTop = true
+				BillboardGui.LightInfluence = 5
+				BillboardGui.Size = UDim2.new(0, 47, 0, 50)
+				BillboardGui.StudsOffset = Vector3.new(0, 2, 0)
+
+				TextLabel.Parent = BillboardGui
+				TextLabel.BackgroundColor3 = Color3.new(41, 102, 0)
+				TextLabel.BackgroundTransparency = 1
+				TextLabel.Size = UDim2.new(1, 0, 1, 0)
+				TextLabel.Text = Pick
+				TextLabel.TextColor3 = Color3.new(41, 102, 0)
+				TextLabel.TextScaled = true
+		end
+		end)
+
+		for _,v in ipairs(Grabable:GetChildren()) do
+			if v.Name == "Tool" and v:FindFirstChild("Configuration") and v.Configuration:FindFirstChild("Data") and v.Configuration.Data:FindFirstChild("Tool") and v.Configuration.Data.Tool.Value == Pick then
+				local BillboardGui = Instance.new("BillboardGui")
+				local TextLabel = Instance.new("TextLabel")
+				BillboardGui.Parent = v.Model. Handle
+				BillboardGui.AlwaysOnTop = true
+				BillboardGui.LightInfluence = 5
+				BillboardGui.Size = UDim2.new(0, 47, 0, 50)
+				BillboardGui.StudsOffset = Vector3.new(0, 2, 0)
+
+				TextLabel.Parent = BillboardGui
+				TextLabel.BackgroundColor3 = Color3.new(41, 102, 0)
+				TextLabel.BackgroundTransparency = 1
+				TextLabel.Size = UDim2.new(1, 0, 1, 0)
+				TextLabel.Text = Pick
+				TextLabel.TextColor3 = Color3.new(41, 102, 0)
+				TextLabel.TextScaled = true
+				end
+			end
+
+		workspace.DescendantAdded:Connect(function(v)
+				task.wait(Random.new():NextNumber(0.2,0.4))
+				if v.Name == "Tool" and v:FindFirstChild("Configuration") and v.Configuration:FindFirstChild("Data") and v.Configuration.Data:FindFirstChild("Tool") and v.Configuration.Data.Tool.Value == Pick then
+				local BillboardGui = Instance.new("BillboardGui")
+				local TextLabel = Instance.new("TextLabel")
+				BillboardGui.Parent = v.Model. Handle
+				BillboardGui.AlwaysOnTop = true
+				BillboardGui.LightInfluence = 5
+				BillboardGui.Size = UDim2.new(0, 47, 0, 50)
+				BillboardGui.StudsOffset = Vector3.new(0, 2, 0)
+
+				TextLabel.Parent = BillboardGui
+				TextLabel.BackgroundColor3 = Color3.new(41, 102, 0)
+				TextLabel.BackgroundTransparency = 1
+				TextLabel.Size = UDim2.new(1, 0, 1, 0)
+				TextLabel.Text = Pick
+				TextLabel.TextColor3 = Color3.new(41, 102, 0)
+				TextLabel.TextScaled = true
+				end
+			end)
+end
+
+local function PreRelPickESPFUNC() -- w
+		local Pick = "Pre-release Pickaxe 2.0" --insert pickaxe name here
+		local Workspace = game:GetService("Workspace")
+		local Grabable = Workspace:WaitForChild("Grabable")
+
+		Grabable.ChildAdded:Connect(function(v)
+			if v.Name == "Tool" and v:FindFirstChild("Configuration") and v.Configuration:FindFirstChild("Data") and v.Configuration.Data:FindFirstChild("Tool") and v.Configuration.Data.Tool.Value == Pick then
+				local BillboardGui = Instance.new("BillboardGui")
+				local TextLabel = Instance.new("TextLabel")
+				BillboardGui.Parent = v.Handle
+				BillboardGui.AlwaysOnTop = true
+				BillboardGui.LightInfluence = 5
+				BillboardGui.Size = UDim2.new(0, 47, 0, 50)
+				BillboardGui.StudsOffset = Vector3.new(0, 2, 0)
+
+				TextLabel.Parent = BillboardGui
+				TextLabel.BackgroundColor3 = Color3.new(41, 102, 0)
+				TextLabel.BackgroundTransparency = 1
+				TextLabel.Size = UDim2.new(1, 0, 1, 0)
+				TextLabel.Text = Pick
+				TextLabel.TextColor3 = Color3.new(41, 102, 0)
+				TextLabel.TextScaled = true
+		end
+		end)
+
+		for _,v in ipairs(Grabable:GetChildren()) do
+			if v.Name == "Tool" and v:FindFirstChild("Configuration") and v.Configuration:FindFirstChild("Data") and v.Configuration.Data:FindFirstChild("Tool") and v.Configuration.Data.Tool.Value == Pick then
+				local BillboardGui = Instance.new("BillboardGui")
+				local TextLabel = Instance.new("TextLabel")
+				BillboardGui.Parent = v.Model. Handle
+				BillboardGui.AlwaysOnTop = true
+				BillboardGui.LightInfluence = 5
+				BillboardGui.Size = UDim2.new(0, 47, 0, 50)
+				BillboardGui.StudsOffset = Vector3.new(0, 2, 0)
+
+				TextLabel.Parent = BillboardGui
+				TextLabel.BackgroundColor3 = Color3.new(41, 102, 0)
+				TextLabel.BackgroundTransparency = 1
+				TextLabel.Size = UDim2.new(1, 0, 1, 0)
+				TextLabel.Text = Pick
+				TextLabel.TextColor3 = Color3.new(41, 102, 0)
+				TextLabel.TextScaled = true
+				end
+			end
+
+		workspace.DescendantAdded:Connect(function(v)
+				task.wait(Random.new():NextNumber(0.2,0.4))
+				if v.Name == "Tool" and v:FindFirstChild("Configuration") and v.Configuration:FindFirstChild("Data") and v.Configuration.Data:FindFirstChild("Tool") and v.Configuration.Data.Tool.Value == Pick then
+				local BillboardGui = Instance.new("BillboardGui")
+				local TextLabel = Instance.new("TextLabel")
+				BillboardGui.Parent = v.Model. Handle
+				BillboardGui.AlwaysOnTop = true
+				BillboardGui.LightInfluence = 5
+				BillboardGui.Size = UDim2.new(0, 47, 0, 50)
+				BillboardGui.StudsOffset = Vector3.new(0, 2, 0)
+
+				TextLabel.Parent = BillboardGui
+				TextLabel.BackgroundColor3 = Color3.new(41, 102, 0)
+				TextLabel.BackgroundTransparency = 1
+				TextLabel.Size = UDim2.new(1, 0, 1, 0)
+				TextLabel.Text = Pick
+				TextLabel.TextColor3 = Color3.new(41, 102, 0)
+				TextLabel.TextScaled = true
+				end
+			end)
+end
+
+local function SleighPickESPFUNC() -- w
+		local Pick = "Sleigh Celestial Pickaxe" --insert pickaxe name here
+		local Workspace = game:GetService("Workspace")
+		local Grabable = Workspace:WaitForChild("Grabable")
+
+		Grabable.ChildAdded:Connect(function(v)
+			if v.Name == "Tool" and v:FindFirstChild("Configuration") and v.Configuration:FindFirstChild("Data") and v.Configuration.Data:FindFirstChild("Tool") and v.Configuration.Data.Tool.Value == Pick then
+				local BillboardGui = Instance.new("BillboardGui")
+				local TextLabel = Instance.new("TextLabel")
+				BillboardGui.Parent = v.Handle
+				BillboardGui.AlwaysOnTop = true
+				BillboardGui.LightInfluence = 5
+				BillboardGui.Size = UDim2.new(0, 47, 0, 50)
+				BillboardGui.StudsOffset = Vector3.new(0, 2, 0)
+
+				TextLabel.Parent = BillboardGui
+				TextLabel.BackgroundColor3 = Color3.new(41, 102, 0)
+				TextLabel.BackgroundTransparency = 1
+				TextLabel.Size = UDim2.new(1, 0, 1, 0)
+				TextLabel.Text = Pick
+				TextLabel.TextColor3 = Color3.new(41, 102, 0)
+				TextLabel.TextScaled = true
+		end
+		end)
+
+		for _,v in ipairs(Grabable:GetChildren()) do
+			if v.Name == "Tool" and v:FindFirstChild("Configuration") and v.Configuration:FindFirstChild("Data") and v.Configuration.Data:FindFirstChild("Tool") and v.Configuration.Data.Tool.Value == Pick then
+				local BillboardGui = Instance.new("BillboardGui")
+				local TextLabel = Instance.new("TextLabel")
+				BillboardGui.Parent = v.Model. Handle
+				BillboardGui.AlwaysOnTop = true
+				BillboardGui.LightInfluence = 5
+				BillboardGui.Size = UDim2.new(0, 47, 0, 50)
+				BillboardGui.StudsOffset = Vector3.new(0, 2, 0)
+
+				TextLabel.Parent = BillboardGui
+				TextLabel.BackgroundColor3 = Color3.new(41, 102, 0)
+				TextLabel.BackgroundTransparency = 1
+				TextLabel.Size = UDim2.new(1, 0, 1, 0)
+				TextLabel.Text = Pick
+				TextLabel.TextColor3 = Color3.new(41, 102, 0)
+				TextLabel.TextScaled = true
+				end
+			end
+
+		workspace.DescendantAdded:Connect(function(v)
+				task.wait(Random.new():NextNumber(0.2,0.4))
+				if v.Name == "Tool" and v:FindFirstChild("Configuration") and v.Configuration:FindFirstChild("Data") and v.Configuration.Data:FindFirstChild("Tool") and v.Configuration.Data.Tool.Value == Pick then
+				local BillboardGui = Instance.new("BillboardGui")
+				local TextLabel = Instance.new("TextLabel")
+				BillboardGui.Parent = v.Model. Handle
+				BillboardGui.AlwaysOnTop = true
+				BillboardGui.LightInfluence = 5
+				BillboardGui.Size = UDim2.new(0, 47, 0, 50)
+				BillboardGui.StudsOffset = Vector3.new(0, 2, 0)
+
+				TextLabel.Parent = BillboardGui
+				TextLabel.BackgroundColor3 = Color3.new(41, 102, 0)
+				TextLabel.BackgroundTransparency = 1
+				TextLabel.Size = UDim2.new(1, 0, 1, 0)
+				TextLabel.Text = Pick
+				TextLabel.TextColor3 = Color3.new(41, 102, 0)
+				TextLabel.TextScaled = true
+				end
+			end)
+end
+
+local function HauntedPickESPFUNC() -- w
+		local Pick = "Haunted Pickaxe" --insert pickaxe name here
+		local Workspace = game:GetService("Workspace")
+		local Grabable = Workspace:WaitForChild("Grabable")
+
+		Grabable.ChildAdded:Connect(function(v)
+			if v.Name == "Tool" and v:FindFirstChild("Configuration") and v.Configuration:FindFirstChild("Data") and v.Configuration.Data:FindFirstChild("Tool") and v.Configuration.Data.Tool.Value == Pick then
+				local BillboardGui = Instance.new("BillboardGui")
+				local TextLabel = Instance.new("TextLabel")
+				BillboardGui.Parent = v.Handle
+				BillboardGui.AlwaysOnTop = true
+				BillboardGui.LightInfluence = 5
+				BillboardGui.Size = UDim2.new(0, 47, 0, 50)
+				BillboardGui.StudsOffset = Vector3.new(0, 2, 0)
+
+				TextLabel.Parent = BillboardGui
+				TextLabel.BackgroundColor3 = Color3.new(41, 102, 0)
+				TextLabel.BackgroundTransparency = 1
+				TextLabel.Size = UDim2.new(1, 0, 1, 0)
+				TextLabel.Text = Pick
+				TextLabel.TextColor3 = Color3.new(41, 102, 0)
+				TextLabel.TextScaled = true
+		end
+		end)
+
+		for _,v in ipairs(Grabable:GetChildren()) do
+			if v.Name == "Tool" and v:FindFirstChild("Configuration") and v.Configuration:FindFirstChild("Data") and v.Configuration.Data:FindFirstChild("Tool") and v.Configuration.Data.Tool.Value == Pick then
+				local BillboardGui = Instance.new("BillboardGui")
+				local TextLabel = Instance.new("TextLabel")
+				BillboardGui.Parent = v.Model. Handle
+				BillboardGui.AlwaysOnTop = true
+				BillboardGui.LightInfluence = 5
+				BillboardGui.Size = UDim2.new(0, 47, 0, 50)
+				BillboardGui.StudsOffset = Vector3.new(0, 2, 0)
+
+				TextLabel.Parent = BillboardGui
+				TextLabel.BackgroundColor3 = Color3.new(41, 102, 0)
+				TextLabel.BackgroundTransparency = 1
+				TextLabel.Size = UDim2.new(1, 0, 1, 0)
+				TextLabel.Text = Pick
+				TextLabel.TextColor3 = Color3.new(41, 102, 0)
+				TextLabel.TextScaled = true
+				end
+			end
+
+		workspace.DescendantAdded:Connect(function(v)
+				task.wait(Random.new():NextNumber(0.2,0.4))
+				if v.Name == "Tool" and v:FindFirstChild("Configuration") and v.Configuration:FindFirstChild("Data") and v.Configuration.Data:FindFirstChild("Tool") and v.Configuration.Data.Tool.Value == Pick then
+				local BillboardGui = Instance.new("BillboardGui")
+				local TextLabel = Instance.new("TextLabel")
+				BillboardGui.Parent = v.Model. Handle
+				BillboardGui.AlwaysOnTop = true
+				BillboardGui.LightInfluence = 5
+				BillboardGui.Size = UDim2.new(0, 47, 0, 50)
+				BillboardGui.StudsOffset = Vector3.new(0, 2, 0)
+
+				TextLabel.Parent = BillboardGui
+				TextLabel.BackgroundColor3 = Color3.new(41, 102, 0)
+				TextLabel.BackgroundTransparency = 1
+				TextLabel.Size = UDim2.new(1, 0, 1, 0)
+				TextLabel.Text = Pick
+				TextLabel.TextColor3 = Color3.new(41, 102, 0)
+				TextLabel.TextScaled = true
+				end
+			end)
+end
+
+local function CelestialPickESPFUNC() -- w
+		local Pick = "Celestial Pickaxe" --insert pickaxe name here
+		local Workspace = game:GetService("Workspace")
+		local Grabable = Workspace:WaitForChild("Grabable")
+
+		Grabable.ChildAdded:Connect(function(v)
+			if v.Name == "Tool" and v:FindFirstChild("Configuration") and v.Configuration:FindFirstChild("Data") and v.Configuration.Data:FindFirstChild("Tool") and v.Configuration.Data.Tool.Value == Pick then
+				local BillboardGui = Instance.new("BillboardGui")
+				local TextLabel = Instance.new("TextLabel")
+				BillboardGui.Parent = v.Handle
+				BillboardGui.AlwaysOnTop = true
+				BillboardGui.LightInfluence = 5
+				BillboardGui.Size = UDim2.new(0, 47, 0, 50)
+				BillboardGui.StudsOffset = Vector3.new(0, 2, 0)
+
+				TextLabel.Parent = BillboardGui
+				TextLabel.BackgroundColor3 = Color3.new(41, 102, 0)
+				TextLabel.BackgroundTransparency = 1
+				TextLabel.Size = UDim2.new(1, 0, 1, 0)
+				TextLabel.Text = Pick
+				TextLabel.TextColor3 = Color3.new(41, 102, 0)
+				TextLabel.TextScaled = true
+		end
+		end)
+
+		for _,v in ipairs(Grabable:GetChildren()) do
+			if v.Name == "Tool" and v:FindFirstChild("Configuration") and v.Configuration:FindFirstChild("Data") and v.Configuration.Data:FindFirstChild("Tool") and v.Configuration.Data.Tool.Value == Pick then
+				local BillboardGui = Instance.new("BillboardGui")
+				local TextLabel = Instance.new("TextLabel")
+				BillboardGui.Parent = v.Model. Handle
+				BillboardGui.AlwaysOnTop = true
+				BillboardGui.LightInfluence = 5
+				BillboardGui.Size = UDim2.new(0, 47, 0, 50)
+				BillboardGui.StudsOffset = Vector3.new(0, 2, 0)
+
+				TextLabel.Parent = BillboardGui
+				TextLabel.BackgroundColor3 = Color3.new(41, 102, 0)
+				TextLabel.BackgroundTransparency = 1
+				TextLabel.Size = UDim2.new(1, 0, 1, 0)
+				TextLabel.Text = Pick
+				TextLabel.TextColor3 = Color3.new(41, 102, 0)
+				TextLabel.TextScaled = true
+				end
+			end
+
+		workspace.DescendantAdded:Connect(function(v)
+				task.wait(Random.new():NextNumber(0.2,0.4))
+				if v.Name == "Tool" and v:FindFirstChild("Configuration") and v.Configuration:FindFirstChild("Data") and v.Configuration.Data:FindFirstChild("Tool") and v.Configuration.Data.Tool.Value == Pick then
+				local BillboardGui = Instance.new("BillboardGui")
+				local TextLabel = Instance.new("TextLabel")
+				BillboardGui.Parent = v.Model. Handle
+				BillboardGui.AlwaysOnTop = true
+				BillboardGui.LightInfluence = 5
+				BillboardGui.Size = UDim2.new(0, 47, 0, 50)
+				BillboardGui.StudsOffset = Vector3.new(0, 2, 0)
+
+				TextLabel.Parent = BillboardGui
+				TextLabel.BackgroundColor3 = Color3.new(41, 102, 0)
+				TextLabel.BackgroundTransparency = 1
+				TextLabel.Size = UDim2.new(1, 0, 1, 0)
+				TextLabel.Text = Pick
+				TextLabel.TextColor3 = Color3.new(41, 102, 0)
+				TextLabel.TextScaled = true
+				end
+			end)
+end
+
+local function WoodenPickESPFUNC() -- w
+		local Pick = "Wooden Pickaxe" --insert pickaxe name here
+		local Workspace = game:GetService("Workspace")
+		local Grabable = Workspace:WaitForChild("Grabable")
+
+		Grabable.ChildAdded:Connect(function(v)
+			if v.Name == "Tool" and v:FindFirstChild("Configuration") and v.Configuration:FindFirstChild("Data") and v.Configuration.Data:FindFirstChild("Tool") and v.Configuration.Data.Tool.Value == Pick then
+				local BillboardGui = Instance.new("BillboardGui")
+				local TextLabel = Instance.new("TextLabel")
+				BillboardGui.Parent = v.Handle
+				BillboardGui.AlwaysOnTop = true
+				BillboardGui.LightInfluence = 5
+				BillboardGui.Size = UDim2.new(0, 47, 0, 50)
+				BillboardGui.StudsOffset = Vector3.new(0, 2, 0)
+
+				TextLabel.Parent = BillboardGui
+				TextLabel.BackgroundColor3 = Color3.new(41, 102, 0)
+				TextLabel.BackgroundTransparency = 1
+				TextLabel.Size = UDim2.new(1, 0, 1, 0)
+				TextLabel.Text = Pick
+				TextLabel.TextColor3 = Color3.new(41, 102, 0)
+				TextLabel.TextScaled = true
+		end
+		end)
+
+		for _,v in ipairs(Grabable:GetChildren()) do
+			if v.Name == "Tool" and v:FindFirstChild("Configuration") and v.Configuration:FindFirstChild("Data") and v.Configuration.Data:FindFirstChild("Tool") and v.Configuration.Data.Tool.Value == Pick then
+				local BillboardGui = Instance.new("BillboardGui")
+				local TextLabel = Instance.new("TextLabel")
+				BillboardGui.Parent = v.Model. Handle
+				BillboardGui.AlwaysOnTop = true
+				BillboardGui.LightInfluence = 5
+				BillboardGui.Size = UDim2.new(0, 47, 0, 50)
+				BillboardGui.StudsOffset = Vector3.new(0, 2, 0)
+
+				TextLabel.Parent = BillboardGui
+				TextLabel.BackgroundColor3 = Color3.new(41, 102, 0)
+				TextLabel.BackgroundTransparency = 1
+				TextLabel.Size = UDim2.new(1, 0, 1, 0)
+				TextLabel.Text = Pick
+				TextLabel.TextColor3 = Color3.new(41, 102, 0)
+				TextLabel.TextScaled = true
+				end
+			end
+
+		workspace.DescendantAdded:Connect(function(v)
+				task.wait(Random.new():NextNumber(0.2,0.4))
+				if v.Name == "Tool" and v:FindFirstChild("Configuration") and v.Configuration:FindFirstChild("Data") and v.Configuration.Data:FindFirstChild("Tool") and v.Configuration.Data.Tool.Value == Pick then
+				local BillboardGui = Instance.new("BillboardGui")
+				local TextLabel = Instance.new("TextLabel")
+				BillboardGui.Parent = v.Model. Handle
+				BillboardGui.AlwaysOnTop = true
+				BillboardGui.LightInfluence = 5
+				BillboardGui.Size = UDim2.new(0, 47, 0, 50)
+				BillboardGui.StudsOffset = Vector3.new(0, 2, 0)
+
+				TextLabel.Parent = BillboardGui
+				TextLabel.BackgroundColor3 = Color3.new(41, 102, 0)
+				TextLabel.BackgroundTransparency = 1
+				TextLabel.Size = UDim2.new(1, 0, 1, 0)
+				TextLabel.Text = Pick
+				TextLabel.TextColor3 = Color3.new(41, 102, 0)
+				TextLabel.TextScaled = true
+				end
+			end)
+end
+
+local function DualPickESPFUNC() -- w
+		local Pick = "Duality Pickaxe" --insert pickaxe name here
+		local Workspace = game:GetService("Workspace")
+		local Grabable = Workspace:WaitForChild("Grabable")
+
+		Grabable.ChildAdded:Connect(function(v)
+			if v.Name == "Tool" and v:FindFirstChild("Configuration") and v.Configuration:FindFirstChild("Data") and v.Configuration.Data:FindFirstChild("Tool") and v.Configuration.Data.Tool.Value == Pick then
+				local BillboardGui = Instance.new("BillboardGui")
+				local TextLabel = Instance.new("TextLabel")
+				BillboardGui.Parent = v.Handle
+				BillboardGui.AlwaysOnTop = true
+				BillboardGui.LightInfluence = 5
+				BillboardGui.Size = UDim2.new(0, 47, 0, 50)
+				BillboardGui.StudsOffset = Vector3.new(0, 2, 0)
+
+				TextLabel.Parent = BillboardGui
+				TextLabel.BackgroundColor3 = Color3.new(41, 102, 0)
+				TextLabel.BackgroundTransparency = 1
+				TextLabel.Size = UDim2.new(1, 0, 1, 0)
+				TextLabel.Text = Pick
+				TextLabel.TextColor3 = Color3.new(41, 102, 0)
+				TextLabel.TextScaled = true
+		end
+		end)
+
+		for _,v in ipairs(Grabable:GetChildren()) do
+			if v.Name == "Tool" and v:FindFirstChild("Configuration") and v.Configuration:FindFirstChild("Data") and v.Configuration.Data:FindFirstChild("Tool") and v.Configuration.Data.Tool.Value == Pick then
+				local BillboardGui = Instance.new("BillboardGui")
+				local TextLabel = Instance.new("TextLabel")
+				BillboardGui.Parent = v.Model. Handle
+				BillboardGui.AlwaysOnTop = true
+				BillboardGui.LightInfluence = 5
+				BillboardGui.Size = UDim2.new(0, 47, 0, 50)
+				BillboardGui.StudsOffset = Vector3.new(0, 2, 0)
+
+				TextLabel.Parent = BillboardGui
+				TextLabel.BackgroundColor3 = Color3.new(41, 102, 0)
+				TextLabel.BackgroundTransparency = 1
+				TextLabel.Size = UDim2.new(1, 0, 1, 0)
+				TextLabel.Text = Pick
+				TextLabel.TextColor3 = Color3.new(41, 102, 0)
+				TextLabel.TextScaled = true
+				end
+			end
+
+		workspace.DescendantAdded:Connect(function(v)
+				task.wait(Random.new():NextNumber(0.2,0.4))
+				if v.Name == "Tool" and v:FindFirstChild("Configuration") and v.Configuration:FindFirstChild("Data") and v.Configuration.Data:FindFirstChild("Tool") and v.Configuration.Data.Tool.Value == Pick then
+				local BillboardGui = Instance.new("BillboardGui")
+				local TextLabel = Instance.new("TextLabel")
+				BillboardGui.Parent = v.Model. Handle
+				BillboardGui.AlwaysOnTop = true
+				BillboardGui.LightInfluence = 5
+				BillboardGui.Size = UDim2.new(0, 47, 0, 50)
+				BillboardGui.StudsOffset = Vector3.new(0, 2, 0)
+
+				TextLabel.Parent = BillboardGui
+				TextLabel.BackgroundColor3 = Color3.new(41, 102, 0)
+				TextLabel.BackgroundTransparency = 1
+				TextLabel.Size = UDim2.new(1, 0, 1, 0)
+				TextLabel.Text = Pick
+				TextLabel.TextColor3 = Color3.new(41, 102, 0)
+				TextLabel.TextScaled = true
+				end
+			end)
+end
+
+local function TrustyPickESPFUNC() -- w
+		local Pick = "Trusty Pickaxe" --insert pickaxe name here
+		local Workspace = game:GetService("Workspace")
+		local Grabable = Workspace:WaitForChild("Grabable")
+
+		Grabable.ChildAdded:Connect(function(v)
+			if v.Name == "Tool" and v:FindFirstChild("Configuration") and v.Configuration:FindFirstChild("Data") and v.Configuration.Data:FindFirstChild("Tool") and v.Configuration.Data.Tool.Value == Pick then
+				local BillboardGui = Instance.new("BillboardGui")
+				local TextLabel = Instance.new("TextLabel")
+				BillboardGui.Parent = v.Handle
+				BillboardGui.AlwaysOnTop = true
+				BillboardGui.LightInfluence = 5
+				BillboardGui.Size = UDim2.new(0, 47, 0, 50)
+				BillboardGui.StudsOffset = Vector3.new(0, 2, 0)
+
+				TextLabel.Parent = BillboardGui
+				TextLabel.BackgroundColor3 = Color3.new(41, 102, 0)
+				TextLabel.BackgroundTransparency = 1
+				TextLabel.Size = UDim2.new(1, 0, 1, 0)
+				TextLabel.Text = Pick
+				TextLabel.TextColor3 = Color3.new(41, 102, 0)
+				TextLabel.TextScaled = true
+		end
+		end)
+
+		for _,v in ipairs(Grabable:GetChildren()) do
+			if v.Name == "Tool" and v:FindFirstChild("Configuration") and v.Configuration:FindFirstChild("Data") and v.Configuration.Data:FindFirstChild("Tool") and v.Configuration.Data.Tool.Value == Pick then
+				local BillboardGui = Instance.new("BillboardGui")
+				local TextLabel = Instance.new("TextLabel")
+				BillboardGui.Parent = v.Model. Handle
+				BillboardGui.AlwaysOnTop = true
+				BillboardGui.LightInfluence = 5
+				BillboardGui.Size = UDim2.new(0, 47, 0, 50)
+				BillboardGui.StudsOffset = Vector3.new(0, 2, 0)
+
+				TextLabel.Parent = BillboardGui
+				TextLabel.BackgroundColor3 = Color3.new(41, 102, 0)
+				TextLabel.BackgroundTransparency = 1
+				TextLabel.Size = UDim2.new(1, 0, 1, 0)
+				TextLabel.Text = Pick
+				TextLabel.TextColor3 = Color3.new(41, 102, 0)
+				TextLabel.TextScaled = true
+				end
+			end
+
+		workspace.DescendantAdded:Connect(function(v)
+				task.wait(Random.new():NextNumber(0.2,0.4))
+				if v.Name == "Tool" and v:FindFirstChild("Configuration") and v.Configuration:FindFirstChild("Data") and v.Configuration.Data:FindFirstChild("Tool") and v.Configuration.Data.Tool.Value == Pick then
+				local BillboardGui = Instance.new("BillboardGui")
+				local TextLabel = Instance.new("TextLabel")
+				BillboardGui.Parent = v.Model. Handle
+				BillboardGui.AlwaysOnTop = true
+				BillboardGui.LightInfluence = 5
+				BillboardGui.Size = UDim2.new(0, 47, 0, 50)
+				BillboardGui.StudsOffset = Vector3.new(0, 2, 0)
+
+				TextLabel.Parent = BillboardGui
+				TextLabel.BackgroundColor3 = Color3.new(41, 102, 0)
+				TextLabel.BackgroundTransparency = 1
+				TextLabel.Size = UDim2.new(1, 0, 1, 0)
+				TextLabel.Text = Pick
+				TextLabel.TextColor3 = Color3.new(41, 102, 0)
+				TextLabel.TextScaled = true
+				end
+			end)
+end
+
+EspPickOtherTab:AddButton('Esp Rare Pickaxes', function()
+	HeavyPickESPFUNC()
+	RadioactivePickESPFUNC()
+	SporePickESPFUNC()
+	FrostPickESPFUNC()
+	PreRelPickESPFUNC()
+	SleighPickESPFUNC()
+	HauntedPickESPFUNC()
+	CelestialPickESPFUNC()
+	WoodenPickESPFUNC()
 end)
 
-for _,v in ipairs(Grabable:GetChildren()) do
-    if v.Name == "Tool" and v:FindFirstChild("Configuration") and v.Configuration:FindFirstChild("Data") and v.Configuration.Data:FindFirstChild("Tool") and v.Configuration.Data.Tool.Value == Pick then
-        local BillboardGui = Instance.new("BillboardGui")
-        local TextLabel = Instance.new("TextLabel")
-        BillboardGui.Parent = v.Model. Handle
-        BillboardGui.AlwaysOnTop = true
-        BillboardGui.LightInfluence = 5
-        BillboardGui.Size = UDim2.new(0, 47, 0, 50)
-        BillboardGui.StudsOffset = Vector3.new(0, 2, 0)
-
-        TextLabel.Parent = BillboardGui
-        TextLabel.BackgroundColor3 = Color3.new(41, 102, 0)
-        TextLabel.BackgroundTransparency = 1
-        TextLabel.Size = UDim2.new(1, 0, 1, 0)
-        TextLabel.Text = Pick
-        TextLabel.TextColor3 = Color3.new(41, 102, 0)
-        TextLabel.TextScaled = true
-		end
-    end
-
-workspace.DescendantAdded:Connect(function(v)
-		task.wait(Random.new():NextNumber(0.2,0.4))
-		if v.Name == "Tool" and v:FindFirstChild("Configuration") and v.Configuration:FindFirstChild("Data") and v.Configuration.Data:FindFirstChild("Tool") and v.Configuration.Data.Tool.Value == Pick then
-        local BillboardGui = Instance.new("BillboardGui")
-        local TextLabel = Instance.new("TextLabel")
-        BillboardGui.Parent = v.Model. Handle
-        BillboardGui.AlwaysOnTop = true
-        BillboardGui.LightInfluence = 5
-        BillboardGui.Size = UDim2.new(0, 47, 0, 50)
-        BillboardGui.StudsOffset = Vector3.new(0, 2, 0)
-
-        TextLabel.Parent = BillboardGui
-        TextLabel.BackgroundColor3 = Color3.new(41, 102, 0)
-        TextLabel.BackgroundTransparency = 1
-        TextLabel.Size = UDim2.new(1, 0, 1, 0)
-        TextLabel.Text = Pick
-        TextLabel.TextColor3 = Color3.new(41, 102, 0)
-        TextLabel.TextScaled = true
-		end
-	end)
+EspPickOtherTab:AddButton('Esp All Pickaxes', function()
+   
 end)
 
 local MusicOtherUnderTab = Tabs.Hub:AddLeftGroupbox('Music Utilities')
-
-
 
 MusicOtherUnderTab:AddButton('Remove Music', function()
     game.Workspace.Sound:Destroy()
@@ -1901,10 +2749,21 @@ MusicOtherUnderTab:AddButton('LandScapes', function()
 	s:Play()
 end)
 
-MusicOtherUnderTab:AddButton('Chill', function()
+MusicOtherUnderTab:AddButton('What can I do?', function()
     local s = Instance.new("Sound")
 	s.Name = "Sound"
 	s.SoundId = 'rbxassetid://1846191966'
+	s.Volume = 2
+	s.Looped = true
+	s.archivable = false
+	s.Parent = game.Workspace
+	s:Play()
+end)
+
+MusicOtherUnderTab:AddButton('Chill Jazz', function()
+    local s = Instance.new("Sound")
+	s.Name = "Sound"
+	s.SoundId = 'rbxassetid://1845341094'
 	s.Volume = 2
 	s.Looped = true
 	s.archivable = false
@@ -2215,3 +3074,8 @@ task.defer(function()
 end)
 
 -- < Notify user everything has loaded. />D
+
+local function ReloadSlotBruh()
+	game:GetService("ReplicatedStorage").Events.ReloadSlot:InvokeServer() 
+end
+
